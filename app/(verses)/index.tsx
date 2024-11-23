@@ -6,6 +6,7 @@ import {
 	Modal,
 	Pressable,
 	Image,
+	TextInput,
 } from "react-native";
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useLocalSearchParams } from "expo-router";
@@ -28,6 +29,7 @@ const VersesScreen = () => {
 	const [isRecitorModalVisible, setIsRecitorModalVisible] = useState(false);
 	const { setRecitations, setSelectedRecitor, recitations, selectedRecitor } =
 		useStore();
+	const [searchQuery, setSearchQuery] = useState("");
 
 	const { data, isLoading: isLoadingRecitations } = useQuery({
 		queryKey: ["recitations"],
@@ -76,6 +78,21 @@ const VersesScreen = () => {
 		return versesData?.pages.flatMap((page) => page.verses) ?? [];
 	}, [versesData]);
 
+	const filteredVerses = useMemo(() => {
+		if (!searchQuery.trim()) return flattenedVerses;
+
+		return flattenedVerses.filter((verse) => {
+			const translation = verse.words
+				.map((word) => word.translation.text)
+				.join(" ")
+				.toLowerCase();
+			const verseKey = verse.verse_key.toLowerCase();
+			const query = searchQuery.toLowerCase();
+
+			return translation.includes(query) || verseKey.includes(query);
+		});
+	}, [flattenedVerses, searchQuery]);
+
 	console.log("Fetched verses data:", versesData);
 	console.log("Full response:", versesData);
 	console.log("Verses array:", versesData?.pages);
@@ -115,30 +132,30 @@ const VersesScreen = () => {
 		<SafeAreaView
 			className={`mb-6 p-5 bg-white rounded-xl shadow-sm border ${
 				currentlyPlayingVerseKey === verse.verse_key
-					? "border-blue-400 bg-blue-50"
-					: "border-slate-100"
+					? "border-indigo-500 bg-indigo-50"
+					: "border-gray-100"
 			}`}
 		>
 			<Text
 				className={`text-2xl leading-10 font-medium mb-3 text-right ${
 					currentlyPlayingVerseKey === verse.verse_key
-						? "text-blue-600"
-						: "text-slate-800"
+						? "text-indigo-700"
+						: "text-gray-900"
 				}`}
 				style={{ fontFamily: "me_quran-2" }}
 			>
 				{verse.text_uthmani}
 			</Text>
-			<Text className="text-base text-slate-700 mb-4 text-right">
+			<Text className="text-base text-gray-700 mb-4 text-right">
 				{verse.words.map((word) => word.translation.text).join(" ")}
 			</Text>
 			<View className="flex-row items-center justify-between">
 				<View className="flex-row items-center">
-					<Text className="text-sm text-slate-500">
+					<Text className="text-sm text-gray-600">
 						Verse {verse.verse_number}
 					</Text>
-					<Text className="text-slate-400 mx-2">•</Text>
-					<Text className="text-sm text-slate-500">
+					<Text className="text-gray-400 mx-2">•</Text>
+					<Text className="text-sm text-gray-600">
 						{verse.verse_key}
 					</Text>
 				</View>
@@ -171,20 +188,11 @@ const VersesScreen = () => {
 		</SafeAreaView>
 	);
 
-	const ListHeader = () => (
-		<View className="mb-6">
-			<Text className="text-2xl font-bold text-slate-800 mb-2">
-				Chapter {chapter}
-			</Text>
-			<Text className="text-base text-slate-600">Page {pages}</Text>
-		</View>
-	);
-
 	if (isLoading) {
 		return (
-			<SafeAreaView className="flex-1 bg-slate-50 mt-4">
+			<SafeAreaView className="flex-1 bg-gray-50 mt-4">
 				<View className="flex-1 items-center justify-center">
-					<Text className="text-slate-600 text-lg">
+					<Text className="text-gray-700 text-lg">
 						Loading verses...
 					</Text>
 				</View>
@@ -205,12 +213,46 @@ const VersesScreen = () => {
 	}
 
 	return (
-		<SafeAreaView className="flex-1 bg-slate-50">
+		<SafeAreaView className="flex-1 bg-gray-50">
+			<View className="px-4 bg-gray-50">
+				<View className="mb-6">
+					<Text className="text-2xl font-bold text-slate-800 mb-2">
+						Chapter {chapter}
+					</Text>
+					<Text className="text-base text-slate-600">
+						Page {pages}
+					</Text>
+					<View className="mt-4">
+						<View className="flex-row items-center bg-white rounded-lg px-4 py-2 border border-gray-200">
+							<FontAwesome
+								name="search"
+								size={16}
+								color="#6B7280"
+							/>
+							<TextInput
+								className="flex-1 ml-2 text-base text-gray-900"
+								placeholder="Search verses..."
+								value={searchQuery}
+								onChangeText={setSearchQuery}
+								placeholderTextColor="#9CA3AF"
+							/>
+							{searchQuery ? (
+								<Pressable onPress={() => setSearchQuery("")}>
+									<FontAwesome
+										name="times-circle"
+										size={16}
+										color="#6B7280"
+									/>
+								</Pressable>
+							) : null}
+						</View>
+					</View>
+				</View>
+			</View>
 			<FlatList
-				data={flattenedVerses}
+				data={filteredVerses}
 				renderItem={renderVerseItem}
 				keyExtractor={(verse) => verse.id.toString()}
-				ListHeaderComponent={ListHeader}
 				contentContainerClassName="px-4 py-6"
 				showsVerticalScrollIndicator={false}
 				initialNumToRender={10}
@@ -221,12 +263,19 @@ const VersesScreen = () => {
 				ListFooterComponent={() =>
 					isFetchingNextPage ? (
 						<View className="py-4">
-							<Text className="text-center text-slate-600">
+							<Text className="text-center text-gray-600">
 								Loading more verses...
 							</Text>
 						</View>
 					) : null
 				}
+				ListEmptyComponent={() => (
+					<View className="flex-1 items-center justify-center py-8">
+						<Text className="text-gray-600 text-center">
+							No verses found matching your search.
+						</Text>
+					</View>
+				)}
 			/>
 			<View className="absolute right-8 bottom-8 w-14 h-14 ">
 				<RecitorSelector
