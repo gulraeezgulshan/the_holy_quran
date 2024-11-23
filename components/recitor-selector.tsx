@@ -51,10 +51,10 @@ const RecitorSelector: React.FC<RecitorSelectorProps> = ({
 	};
 
 	return (
-		<>
+		<View className="flex-1 bg-red-300">
 			{showButton && (
 				<Pressable
-					className="absolute w-12 h-12 bg-blue-500 rounded-full items-center justify-center shadow-lg"
+					className="h-14 w-14 bg-blue-500 rounded-full items-center justify-center shadow-lg"
 					style={buttonPosition}
 					onPress={() => onClose()}
 				>
@@ -64,35 +64,37 @@ const RecitorSelector: React.FC<RecitorSelectorProps> = ({
 
 			<Modal
 				animationType="slide"
-				transparent={true}
+				transparent={false}
 				visible={isVisible}
 				onRequestClose={onClose}
 			>
-				<View className="flex-1 justify-end">
-					<View className="bg-white rounded-t-3xl shadow-xl">
-						<View className="p-4 border-b border-gray-200">
-							<Text className="text-xl font-bold text-center">
+				<View className="flex-1 justify-end bg-black">
+					<View className="bg-gray-900 rounded-t-3xl shadow-xl">
+						<View className="p-4 border-b border-gray-800 flex-row justify-between items-center">
+							<View className="w-8" />
+							<Text className="text-xl font-semibold text-white">
 								Select Recitor
 							</Text>
 							<Pressable
-								className="absolute right-4 top-4"
+								className="w-8 h-8 rounded-full items-center justify-center"
 								onPress={onClose}
 							>
 								<FontAwesome
 									name="close"
-									size={24}
-									color="#666"
+									size={20}
+									color="white"
 								/>
 							</Pressable>
 						</View>
 						<FlatList
 							data={recitations}
-							className="max-h-96"
+							className="max-h-72"
+							showsVerticalScrollIndicator={false}
 							renderItem={({ item }) => (
 								<Pressable
-									className={`p-4 border-b border-gray-100 flex-row items-center justify-between ${
+									className={`p-4 border-b border-gray-800 flex-row items-center justify-between ${
 										selectedRecitor?.id === item.id
-											? "bg-blue-50"
+											? "bg-gray-800"
 											: ""
 									}`}
 									onPress={() => {
@@ -101,15 +103,19 @@ const RecitorSelector: React.FC<RecitorSelectorProps> = ({
 									}}
 								>
 									<View className="flex-row items-center">
-										<Image
-											source={getReciterImage(item.id)}
-											className="w-12 h-12 rounded-full mr-3"
-										/>
-										<View>
-											<Text className="text-lg font-medium">
+										{/* <View className="w-12 h-12 rounded-full">
+											<Image
+												source={getReciterImage(
+													item.id
+												)}
+												className="w-10 h-10 rounded-full"
+											/>
+										</View> */}
+										<View className="flex-1">
+											<Text className="text-base font-medium text-white">
 												{item.reciter_name}
 											</Text>
-											<Text className="text-sm text-gray-500">
+											<Text className="text-sm text-gray-400">
 												{item.style}
 											</Text>
 										</View>
@@ -117,8 +123,8 @@ const RecitorSelector: React.FC<RecitorSelectorProps> = ({
 									{selectedRecitor?.id === item.id && (
 										<FontAwesome
 											name="check"
-											size={20}
-											color="#3b82f6"
+											size={18}
+											color="#60a5fa"
 										/>
 									)}
 								</Pressable>
@@ -128,7 +134,7 @@ const RecitorSelector: React.FC<RecitorSelectorProps> = ({
 					</View>
 				</View>
 			</Modal>
-		</>
+		</View>
 	);
 };
 

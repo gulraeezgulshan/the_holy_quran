@@ -228,11 +228,14 @@ const VersesScreen = () => {
 					) : null
 				}
 			/>
-
-			<RecitorSelector
-				isVisible={isRecitorModalVisible}
-				onClose={() => setIsRecitorModalVisible(!isRecitorModalVisible)}
-			/>
+			<View className="absolute right-8 bottom-8 w-14 h-14 ">
+				<RecitorSelector
+					isVisible={isRecitorModalVisible}
+					onClose={() =>
+						setIsRecitorModalVisible(!isRecitorModalVisible)
+					}
+				/>
+			</View>
 		</SafeAreaView>
 	);
 };

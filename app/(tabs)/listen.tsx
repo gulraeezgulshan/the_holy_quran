@@ -335,11 +335,14 @@ const ListenQuranScreen = () => {
 				className="bg-gray-50"
 			/>
 
-			<RecitorSelector
-				isVisible={isRecitorModalVisible}
-				onClose={() => setIsRecitorModalVisible(!isRecitorModalVisible)}
-				buttonPosition={{ right: 16, bottom: 16 }}
-			/>
+			<View className="absolute right-8 bottom-8 w-14 h-14 ">
+				<RecitorSelector
+					isVisible={isRecitorModalVisible}
+					onClose={() =>
+						setIsRecitorModalVisible(!isRecitorModalVisible)
+					}
+				/>
+			</View>
 		</View>
 	);
 };

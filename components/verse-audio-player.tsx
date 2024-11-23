@@ -64,7 +64,7 @@ const VerseAudioPlayer = ({
 					onPlaybackComplete();
 				}
 				// Handle playback errors
-				if (status.isLoaded && status.error) {
+				if (!status.isLoaded) {
 					handleError("Error during playback");
 				}
 			});
