@@ -50,3 +50,20 @@ export const fetchChapterAudio = async (chapterId: string, recitorId: string) =>
 
     return response.json();
 };
+
+export const getChapterInfo = async (chapterId: string, language: string = 'ur') => {
+    const response = await fetch(
+        `${BASE_URL}/chapters/${chapterId}/info?language=${language}`,
+        {
+            headers: {
+                'Accept': 'application/json'
+            }
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+
+    return response.json();
+};

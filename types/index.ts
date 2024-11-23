@@ -78,3 +78,14 @@ export interface Recitation {
 export interface RecitationsResponse {
     recitations: Recitation[];
 }
+
+export interface ChapterInfoResponse {
+    chapter_info: {
+        id: number;
+        chapter_id: number;
+        language_name: string;
+        short_text: string;
+        source: string;
+        text: string;
+    };
+}

@@ -19,9 +19,20 @@ const ChapterItem = React.memo(({ item }: { item: Chapter }) => (
 		className="bg-white rounded-xl p-4 mb-3 shadow-sm"
 	>
 		<View className="flex-row justify-between items-center mb-2">
-			<Text className="text-2xl font-semibold text-gray-800 text-right">
-				{item.name_arabic}
-			</Text>
+			<Pressable
+				onPress={() =>
+					router.push({
+						pathname: "/(chapters-info)/chapter-info",
+						params: { chapterId: item.id },
+					})
+				}
+				className="bg-gray-100 px-3 py-1 rounded-full"
+			>
+				<Text className="text-xs text-gray-600 font-medium">
+					Chapter Info
+				</Text>
+			</Pressable>
+
 			<View className="bg-gray-100 px-3 py-1 rounded-full">
 				<Text className="text-xs text-gray-600 font-medium">
 					{item.verses_count} verses
@@ -29,12 +40,19 @@ const ChapterItem = React.memo(({ item }: { item: Chapter }) => (
 			</View>
 		</View>
 
-		<Text className="text-lg text-gray-700 font-medium mb-1">
-			{item.name_complex}
-		</Text>
-		<Text className="text-sm text-gray-500 mb-2">
-			{item.translated_name.name}
-		</Text>
+		<View className="flex-row justify-between items-center mb-2">
+			<View className="flex-1">
+				<Text className="text-lg text-gray-700 font-medium">
+					{item.name_complex}
+				</Text>
+				<Text className="text-sm text-gray-500">
+					{item.translated_name.name}
+				</Text>
+			</View>
+			<Text className="text-2xl font-semibold text-gray-800 text-right ml-4">
+				{item.name_arabic}
+			</Text>
+		</View>
 
 		<View className="border-t border-gray-100 mt-2 pt-2">
 			<Text className="text-xs text-gray-500 font-medium">
@@ -110,9 +128,19 @@ const ChaptersScreen = () => {
 
 	// Update filteredChapters to use debouncedQuery instead
 	const filteredChapters = useMemo(() => {
-		if (!debouncedQuery.trim()) return chapters.chapters;
+		const mapChapter = (chapter: any) => ({
+			...chapter,
+			revelation_place: chapter.revelation_place.toLowerCase() as
+				| "makkah"
+				| "madinah",
+			pages: [chapter.pages[0], chapter.pages[1]] as [number, number],
+		});
 
-		return chapters.chapters.filter((chapter) => {
+		if (!debouncedQuery.trim()) {
+			return chapters.chapters.map(mapChapter);
+		}
+
+		return chapters.chapters.map(mapChapter).filter((chapter) => {
 			const searchLower = debouncedQuery.toLowerCase();
 			return (
 				chapter.name_simple.toLowerCase().includes(searchLower) ||
