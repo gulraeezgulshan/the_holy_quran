@@ -89,3 +89,11 @@ export interface ChapterInfoResponse {
         text: string;
     };
 }
+
+export interface AllahName {
+    name: string;
+    transliteration: string;
+    meaning: string;
+    meaningUrdu: string;
+    descriptionUrdu: string;
+}

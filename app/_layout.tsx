@@ -11,7 +11,8 @@ const RootLayout = () => {
 				<Stack.Screen name="index" />
 				<Stack.Screen name="(tabs)" />
 				<Stack.Screen name="(verses)" />
-				<Stack.Screen name="(chapters-info)/chapter-info" />
+				<Stack.Screen name="(chapters-info)" />
+				<Stack.Screen name="(screens)" />
 			</Stack>
 		</QueryClientProvider>
 	);
