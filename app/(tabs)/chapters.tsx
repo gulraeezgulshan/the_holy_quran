@@ -1,4 +1,11 @@
-import { View, Text, FlatList, Pressable, TextInput } from "react-native";
+import {
+	View,
+	Text,
+	FlatList,
+	Pressable,
+	TextInput,
+	Modal,
+} from "react-native";
 import React, { useState, useMemo, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import chapters from "../../data/chapters.json";
@@ -76,51 +83,165 @@ const ChapterItem = React.memo(({ item }: { item: Chapter }) => (
 	</Pressable>
 ));
 
-// Move SearchHeader outside of ChaptersScreen and memoize it
+// Add new type for sort options
+type SortOption = {
+	label: string;
+	key: "id" | "name_simple" | "revelation_order";
+	direction: "asc" | "desc";
+};
+
+// Add new component for sort modal
+const SortModal = React.memo(
+	({
+		visible,
+		onClose,
+		selectedSort,
+		onSelectSort,
+	}: {
+		visible: boolean;
+		onClose: () => void;
+		selectedSort: SortOption;
+		onSelectSort: (option: SortOption) => void;
+	}) => {
+		const sortOptions: SortOption[] = [
+			{ label: "Chapter Number (1-114)", key: "id", direction: "asc" },
+			{ label: "Chapter Number (114-1)", key: "id", direction: "desc" },
+			{
+				label: "Chapter Name (A-Z)",
+				key: "name_simple",
+				direction: "asc",
+			},
+			{
+				label: "Chapter Name (Z-A)",
+				key: "name_simple",
+				direction: "desc",
+			},
+			{
+				label: "Revelation Order (First-Last)",
+				key: "revelation_order",
+				direction: "asc",
+			},
+			{
+				label: "Revelation Order (Last-First)",
+				key: "revelation_order",
+				direction: "desc",
+			},
+		];
+
+		return (
+			<Modal
+				visible={visible}
+				transparent={true}
+				animationType="slide"
+				onRequestClose={onClose}
+			>
+				<View className="flex-1 justify-end bg-black/50">
+					<View className="bg-white rounded-t-xl">
+						<View className="p-4 border-b border-gray-200">
+							<Text className="text-lg font-semibold text-center">
+								Sort Chapters
+							</Text>
+						</View>
+						{sortOptions.map((option) => (
+							<Pressable
+								key={`${option.key}-${option.direction}`}
+								onPress={() => {
+									onSelectSort(option);
+									onClose();
+								}}
+								className={`p-4 border-b border-gray-100 flex-row justify-between items-center
+								${
+									selectedSort.key === option.key &&
+									selectedSort.direction === option.direction
+										? "bg-gray-50"
+										: ""
+								}`}
+							>
+								<Text className="text-base text-gray-700">
+									{option.label}
+								</Text>
+								{selectedSort.key === option.key &&
+									selectedSort.direction ===
+										option.direction && (
+										<FontAwesome
+											name="check"
+											size={16}
+											color="#10B981"
+										/>
+									)}
+							</Pressable>
+						))}
+						<Pressable onPress={onClose} className="p-4 bg-gray-50">
+							<Text className="text-center text-base font-medium text-gray-700">
+								Cancel
+							</Text>
+						</Pressable>
+					</View>
+				</View>
+			</Modal>
+		);
+	}
+);
+
+// Update SearchHeader to include sort button
 const SearchHeader = React.memo(
 	({
 		searchQuery,
 		handleSearch,
 		clearSearch,
+		onSortPress,
 	}: {
 		searchQuery: string;
 		handleSearch: (text: string) => void;
 		clearSearch: () => void;
+		onSortPress: () => void;
 	}) => {
 		const searchInputRef = React.useRef<TextInput>(null);
 
 		return (
 			<View className="mb-2">
-				<View className="flex-row items-center bg-white rounded-lg px-4 py-2 border border-gray-200">
-					<FontAwesome name="search" size={16} color="#6B7280" />
-					<TextInput
-						ref={searchInputRef}
-						className="flex-1 ml-2 text-base text-gray-900"
-						placeholder="Search by name, number or translation"
-						value={searchQuery}
-						onChangeText={handleSearch}
-						placeholderTextColor="#9CA3AF"
-						autoCorrect={false}
-						returnKeyType="search"
-						clearButtonMode="while-editing"
-						enablesReturnKeyAutomatically={true}
-						keyboardType="default"
-						onSubmitEditing={() => {}}
-					/>
-					{searchQuery ? (
-						<Pressable
-							onPress={() => {
-								clearSearch();
-								searchInputRef.current?.focus();
-							}}
-						>
-							<FontAwesome
-								name="times-circle"
-								size={16}
-								color="#6B7280"
-							/>
-						</Pressable>
-					) : null}
+				<View className="flex-row items-center gap-2">
+					<View className="flex-1 flex-row items-center bg-white rounded-lg px-4 py-2 border border-gray-200">
+						<FontAwesome name="search" size={16} color="#6B7280" />
+						<TextInput
+							ref={searchInputRef}
+							className="flex-1 ml-2 text-base text-gray-900"
+							placeholder="Search by name, number or translation"
+							value={searchQuery}
+							onChangeText={handleSearch}
+							placeholderTextColor="#9CA3AF"
+							autoCorrect={false}
+							returnKeyType="search"
+							clearButtonMode="while-editing"
+							enablesReturnKeyAutomatically={true}
+							keyboardType="default"
+							onSubmitEditing={() => {}}
+						/>
+						{searchQuery ? (
+							<Pressable
+								onPress={() => {
+									clearSearch();
+									searchInputRef.current?.focus();
+								}}
+							>
+								<FontAwesome
+									name="times-circle"
+									size={16}
+									color="#6B7280"
+								/>
+							</Pressable>
+						) : null}
+					</View>
+					<Pressable
+						onPress={onSortPress}
+						className="bg-white min-h-12 min-w-12 items-center justify-center rounded-lg border border-gray-200"
+					>
+						<FontAwesome
+							name="sort-amount-asc"
+							size={20}
+							color="#6B7280"
+						/>
+					</Pressable>
 				</View>
 			</View>
 		);
@@ -130,6 +251,12 @@ const SearchHeader = React.memo(
 const ChaptersScreen = () => {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [debouncedQuery, setDebouncedQuery] = useState("");
+	const [isSortModalVisible, setIsSortModalVisible] = useState(false);
+	const [selectedSort, setSelectedSort] = useState<SortOption>({
+		label: "Chapter Number (1-114)",
+		key: "id",
+		direction: "asc",
+	});
 
 	// Create a debounced search function
 	const debouncedSearch = useCallback(
@@ -149,21 +276,30 @@ const ChaptersScreen = () => {
 			pages: [chapter.pages[0], chapter.pages[1]] as [number, number],
 		});
 
-		if (!debouncedQuery.trim()) {
-			return chapters.chapters.map(mapChapter);
+		let results = chapters.chapters.map(mapChapter);
+
+		if (debouncedQuery.trim()) {
+			results = results.filter((chapter) => {
+				const searchLower = debouncedQuery.toLowerCase();
+				return (
+					chapter.name_simple.toLowerCase().includes(searchLower) ||
+					chapter.translated_name.name
+						.toLowerCase()
+						.includes(searchLower) ||
+					chapter.id.toString().includes(searchLower)
+				);
+			});
 		}
 
-		return chapters.chapters.map(mapChapter).filter((chapter) => {
-			const searchLower = debouncedQuery.toLowerCase();
+		// Apply sorting
+		return results.sort((a, b) => {
+			const multiplier = selectedSort.direction === "asc" ? 1 : -1;
 			return (
-				chapter.name_simple.toLowerCase().includes(searchLower) ||
-				chapter.translated_name.name
-					.toLowerCase()
-					.includes(searchLower) ||
-				chapter.id.toString().includes(searchLower)
+				(a[selectedSort.key] > b[selectedSort.key] ? 1 : -1) *
+				multiplier
 			);
 		});
-	}, [debouncedQuery]);
+	}, [debouncedQuery, selectedSort]);
 
 	const handleSearch = (text: string) => {
 		setSearchQuery(text);
@@ -188,6 +324,7 @@ const ChaptersScreen = () => {
 					searchQuery={searchQuery}
 					handleSearch={handleSearch}
 					clearSearch={clearSearch}
+					onSortPress={() => setIsSortModalVisible(true)}
 				/>
 			</View>
 			<FlatList
@@ -206,6 +343,12 @@ const ChaptersScreen = () => {
 						</Text>
 					</View>
 				)}
+			/>
+			<SortModal
+				visible={isSortModalVisible}
+				onClose={() => setIsSortModalVisible(false)}
+				selectedSort={selectedSort}
+				onSelectSort={setSelectedSort}
 			/>
 		</SafeAreaView>
 	);
