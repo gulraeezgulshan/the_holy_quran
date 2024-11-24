@@ -1,4 +1,10 @@
-import { View, Text, ScrollView, LogBox } from "react-native";
+import {
+	View,
+	Text,
+	ScrollView,
+	LogBox,
+	ActivityIndicator,
+} from "react-native";
 import React from "react";
 import { useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -20,16 +26,25 @@ const ChapterInfo = () => {
 
 	if (isLoading) {
 		return (
-			<SafeAreaView>
-				<Text>Loading...</Text>
+			<SafeAreaView className="flex-1">
+				<View className="flex-1 items-center justify-center space-y-4">
+					<ActivityIndicator size="large" color="#10b981" />
+					<Text className="text-lg font-medium text-gray-600">
+						Loading chapter information...
+					</Text>
+				</View>
 			</SafeAreaView>
 		);
 	}
 
 	if (error) {
 		return (
-			<SafeAreaView>
-				<Text>Error loading chapter info</Text>
+			<SafeAreaView className="flex-1">
+				<View className="flex-1 items-center justify-center">
+					<Text className="text-lg font-medium text-red-500">
+						Error loading chapter information
+					</Text>
+				</View>
 			</SafeAreaView>
 		);
 	}

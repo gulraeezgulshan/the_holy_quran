@@ -33,6 +33,12 @@ const ChapterItem = React.memo(({ item }: { item: Chapter }) => (
 				</Text>
 			</Pressable>
 
+			<View className="bg-emerald-100 px-3 py-1 rounded-full">
+				<Text className="text-xs text-emerald-700 font-medium">
+					Revelation #{item.revelation_order}
+				</Text>
+			</View>
+
 			<View className="bg-gray-100 px-3 py-1 rounded-full">
 				<Text className="text-xs text-gray-600 font-medium">
 					{item.verses_count} verses
@@ -41,13 +47,20 @@ const ChapterItem = React.memo(({ item }: { item: Chapter }) => (
 		</View>
 
 		<View className="flex-row justify-between items-center mb-2">
-			<View className="flex-1">
-				<Text className="text-lg text-gray-700 font-medium">
-					{item.name_complex}
-				</Text>
-				<Text className="text-sm text-gray-500">
-					{item.translated_name.name}
-				</Text>
+			<View className="flex-1 flex-row items-center gap-2">
+				<View className="w-14 h-10 rounded-sm  items-center justify-center">
+					<Text className="text-3xl text-gray-700 font-medium">
+						{item.id}
+					</Text>
+				</View>
+				<View>
+					<Text className="text-lg text-gray-700 font-medium">
+						{item.name_complex}
+					</Text>
+					<Text className="text-sm text-gray-500">
+						{item.translated_name.name}
+					</Text>
+				</View>
 			</View>
 			<Text className="text-2xl font-semibold text-gray-800 text-right ml-4">
 				{item.name_arabic}
@@ -77,7 +90,7 @@ const SearchHeader = React.memo(
 		const searchInputRef = React.useRef<TextInput>(null);
 
 		return (
-			<View className="mb-6">
+			<View className="mb-2">
 				<View className="flex-row items-center bg-white rounded-lg px-4 py-2 border border-gray-200">
 					<FontAwesome name="search" size={16} color="#6B7280" />
 					<TextInput
