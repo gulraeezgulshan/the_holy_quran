@@ -21,17 +21,30 @@ export const fetchVersesByChapter = async (chapter: string, page: number = 1, re
 };
 
 export const fetchRecitations = async () => {
-    const response = await fetch(`${BASE_URL}/resources/recitations`, {
-        headers: {
-            'Accept': 'application/json'
+    try {
+        const response = await fetch(`${BASE_URL}/resources/recitations`, {
+            headers: {
+                'Accept': 'application/json'
+            },
+            method: 'GET'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-    });
 
-    if (!response.ok) {
-        throw new Error('Network response was not ok');
+        const data = await response.json();
+        //console.log("Raw API response:", data);
+
+        if (!data || !data.recitations) {
+            throw new Error('Invalid response format');
+        }
+
+        return data as RecitationsResponse;
+    } catch (error) {
+        console.error("Fetch recitations error:", error);
+        throw error;
     }
-
-    return response.json() as Promise<RecitationsResponse>;
 };
 
 export const fetchChapterAudio = async (chapterId: string, recitorId: string) => {

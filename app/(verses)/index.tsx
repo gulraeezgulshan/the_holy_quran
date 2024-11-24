@@ -27,20 +27,8 @@ const VersesScreen = () => {
 	>(null);
 	const [isAutoPlaying, setIsAutoPlaying] = useState(false);
 	const [isRecitorModalVisible, setIsRecitorModalVisible] = useState(false);
-	const { setRecitations, setSelectedRecitor, recitations, selectedRecitor } =
-		useStore();
+	const { selectedRecitor } = useStore();
 	const [searchQuery, setSearchQuery] = useState("");
-
-	const { data, isLoading: isLoadingRecitations } = useQuery({
-		queryKey: ["recitations"],
-		queryFn: fetchRecitations,
-	});
-
-	useEffect(() => {
-		if (data) {
-			setRecitations(data.recitations);
-		}
-	}, [data]);
 
 	const {
 		data: versesData,
@@ -277,12 +265,23 @@ const VersesScreen = () => {
 					</View>
 				)}
 			/>
-			<View className="absolute right-8 bottom-8 w-14 h-14 ">
+			<View className="absolute right-8 bottom-8 w-14 h-14">
+				<Pressable
+					className="h-14 w-14 bg-blue-500 rounded-full items-center justify-center shadow-lg"
+					onPress={() => {
+						console.log("Opening modal");
+						setIsRecitorModalVisible(true);
+					}}
+				>
+					<FontAwesome name="microphone" size={24} color="white" />
+				</Pressable>
 				<RecitorSelector
 					isVisible={isRecitorModalVisible}
-					onClose={() =>
-						setIsRecitorModalVisible(!isRecitorModalVisible)
-					}
+					onClose={() => {
+						console.log("Closing modal");
+						setIsRecitorModalVisible(false);
+					}}
+					showButton={false}
 				/>
 			</View>
 		</SafeAreaView>

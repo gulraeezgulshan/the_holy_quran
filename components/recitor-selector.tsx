@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, Modal, Pressable, FlatList, Image } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { useStore } from "../store";
+import { useQuery } from "@tanstack/react-query";
+import { fetchRecitations } from "../query/verses";
 
 interface RecitorSelectorProps {
 	isVisible: boolean;
@@ -21,7 +23,26 @@ const RecitorSelector: React.FC<RecitorSelectorProps> = ({
 	buttonPosition = { left: 4, bottom: 4 },
 	showButton = true,
 }) => {
-	const { recitations, selectedRecitor, setSelectedRecitor } = useStore();
+	const { recitations, selectedRecitor, setRecitations, setSelectedRecitor } =
+		useStore();
+
+	const {
+		isLoading: isLoadingRecitations,
+		error,
+		data,
+	} = useQuery({
+		queryKey: ["recitations"],
+		queryFn: async () => {
+			const data = await fetchRecitations();
+			setRecitations(data.recitations);
+			return data.recitations;
+		},
+		enabled: true,
+		staleTime: Infinity,
+		retry: 2,
+		refetchOnMount: false,
+		refetchOnWindowFocus: false,
+	});
 
 	const getReciterImage = (id: number) => {
 		switch (id) {
@@ -50,11 +71,91 @@ const RecitorSelector: React.FC<RecitorSelectorProps> = ({
 		}
 	};
 
+	const renderContent = () => {
+		if (isLoadingRecitations) {
+			return (
+				<View className="p-4">
+					<Text className="text-gray-900">
+						Loading recitations...
+					</Text>
+				</View>
+			);
+		}
+
+		if (error) {
+			return (
+				<View className="p-4">
+					<Text className="text-gray-900">
+						Error loading recitations: {(error as Error).message}
+					</Text>
+				</View>
+			);
+		}
+
+		if (!recitations?.length) {
+			return (
+				<View className="p-4">
+					<Text className="text-gray-900">
+						No recitations available
+					</Text>
+				</View>
+			);
+		}
+
+		return (
+			<FlatList
+				data={recitations}
+				className="max-h-72"
+				showsVerticalScrollIndicator={false}
+				renderItem={({ item }) => (
+					<Pressable
+						className={`p-4 border-b border-gray-200 flex-row items-center justify-between ${
+							selectedRecitor?.id === item.id
+								? "bg-gray-100"
+								: "bg-white"
+						}`}
+						onPress={() => {
+							setSelectedRecitor(item);
+							onClose();
+						}}
+					>
+						<View className="flex-row items-center space-x-3">
+							{/* <View className="w-12 h-12 rounded-full overflow-hidden">
+								<Image
+									source={getReciterImage(item.id)}
+									className="w-full h-full"
+									resizeMode="cover"
+								/>
+							</View> */}
+
+							<View>
+								<Text className="text-base font-medium text-gray-900">
+									{item.reciter_name}
+								</Text>
+								<Text className="text-sm text-gray-500">
+									{item.style || "Default"}
+								</Text>
+							</View>
+						</View>
+						{selectedRecitor?.id === item.id && (
+							<FontAwesome
+								name="check"
+								size={18}
+								color="#3b82f6"
+							/>
+						)}
+					</Pressable>
+				)}
+				keyExtractor={(item) => item.id.toString()}
+			/>
+		);
+	};
+
 	return (
-		<View className="flex-1 bg-red-300">
+		<View className="flex-1 p-4">
 			{showButton && (
 				<Pressable
-					className="h-14 w-14 bg-blue-500 rounded-full items-center justify-center shadow-lg"
+					className="absolute h-14 w-14 bg-blue-500 rounded-full items-center justify-center shadow-lg"
 					style={buttonPosition}
 					onPress={() => onClose()}
 				>
@@ -68,71 +169,31 @@ const RecitorSelector: React.FC<RecitorSelectorProps> = ({
 				visible={isVisible}
 				onRequestClose={onClose}
 			>
-				<View className="flex-1 justify-end bg-black">
-					<View className="bg-gray-900 rounded-t-3xl shadow-xl">
-						<View className="p-4 border-b border-gray-800 flex-row justify-between items-center">
-							<View className="w-8" />
-							<Text className="text-xl font-semibold text-white">
-								Select Recitor
-							</Text>
-							<Pressable
-								className="w-8 h-8 rounded-full items-center justify-center"
-								onPress={onClose}
-							>
-								<FontAwesome
-									name="close"
-									size={20}
-									color="white"
-								/>
-							</Pressable>
-						</View>
-						<FlatList
-							data={recitations}
-							className="max-h-72"
-							showsVerticalScrollIndicator={false}
-							renderItem={({ item }) => (
-								<Pressable
-									className={`p-4 border-b border-gray-800 flex-row items-center justify-between ${
-										selectedRecitor?.id === item.id
-											? "bg-gray-800"
-											: ""
-									}`}
-									onPress={() => {
-										setSelectedRecitor(item);
-										onClose();
-									}}
-								>
-									<View className="flex-row items-center">
-										{/* <View className="w-12 h-12 rounded-full">
-											<Image
-												source={getReciterImage(
-													item.id
-												)}
-												className="w-10 h-10 rounded-full"
-											/>
-										</View> */}
-										<View className="flex-1">
-											<Text className="text-base font-medium text-white">
-												{item.reciter_name}
-											</Text>
-											<Text className="text-sm text-gray-400">
-												{item.style}
-											</Text>
-										</View>
-									</View>
-									{selectedRecitor?.id === item.id && (
+				<Pressable className="flex-1 bg-black/20" onPress={onClose}>
+					<View className="flex-1 justify-end">
+						<Pressable onPress={(e) => e.stopPropagation()}>
+							<View className="bg-white rounded-t-3xl shadow-xl max-h-[80%]">
+								<View className="p-4 border-b border-gray-200 flex-row justify-between items-center">
+									<View className="w-8" />
+									<Text className="text-xl font-semibold text-gray-900">
+										Select Recitor
+									</Text>
+									<Pressable
+										className="w-8 h-8 rounded-full items-center justify-center"
+										onPress={onClose}
+									>
 										<FontAwesome
-											name="check"
-											size={18}
-											color="#60a5fa"
+											name="close"
+											size={20}
+											color="#4b5563"
 										/>
-									)}
-								</Pressable>
-							)}
-							keyExtractor={(item) => item.id.toString()}
-						/>
+									</Pressable>
+								</View>
+								{renderContent()}
+							</View>
+						</Pressable>
 					</View>
-				</View>
+				</Pressable>
 			</Modal>
 		</View>
 	);
