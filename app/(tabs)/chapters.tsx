@@ -14,74 +14,153 @@ import { Chapter } from "../../types";
 import { FontAwesome } from "@expo/vector-icons";
 import debounce from "lodash/debounce";
 
-// Extract ChapterItem into a separate memoized component
-const ChapterItem = React.memo(({ item }: { item: Chapter }) => (
-	<Pressable
-		onPress={() =>
+// Optimize ChapterItem by extracting sub-components
+const RevelationBadge = React.memo(({ order }: { order: number }) => (
+	<View className="bg-emerald-100 px-3 py-1 rounded-full">
+		<Text className="text-xs text-emerald-700 font-medium">
+			Revelation #{order}
+		</Text>
+	</View>
+));
+
+const VerseCountBadge = React.memo(({ count }: { count: number }) => (
+	<View className="bg-gray-100 px-3 py-1 rounded-full">
+		<Text className="text-xs text-gray-600 font-medium">
+			{count} verses
+		</Text>
+	</View>
+));
+
+// Create a memoized text component for better performance
+const MemoizedText = React.memo(
+	({
+		children,
+		className,
+	}: {
+		children: React.ReactNode;
+		className: string;
+	}) => <Text className={className}>{children}</Text>
+);
+
+// Optimize ChapterItem even further by breaking it into smaller components
+const ChapterHeader = React.memo(
+	({
+		revelationOrder,
+		versesCount,
+	}: {
+		revelationOrder: number;
+		versesCount: number;
+	}) => (
+		<View className="flex-row justify-between items-center mb-2">
+			<RevelationBadge order={revelationOrder} />
+			<VerseCountBadge count={versesCount} />
+		</View>
+	)
+);
+
+const ChapterContent = React.memo(
+	({
+		nameComplex,
+		translatedName,
+		id,
+		nameArabic,
+	}: {
+		nameComplex: string;
+		translatedName: string;
+		id: number;
+		nameArabic: string;
+	}) => (
+		<View className="flex-row justify-between items-center mb-2">
+			<View className="flex-1">
+				<MemoizedText className="text-lg text-gray-700 font-medium">
+					{nameComplex}
+				</MemoizedText>
+				<MemoizedText className="text-sm text-gray-500">
+					{translatedName}
+				</MemoizedText>
+			</View>
+
+			<View className="rounded-sm items-center justify-center">
+				<MemoizedText className="text-3xl text-gray-700 font-medium">
+					{id}
+				</MemoizedText>
+			</View>
+
+			<MemoizedText className="text-2xl flex-1 font-semibold text-gray-800 text-right">
+				{nameArabic}
+			</MemoizedText>
+		</View>
+	)
+);
+
+const ChapterFooter = React.memo(
+	({
+		revelationPlace,
+		onInfoPress,
+	}: {
+		revelationPlace: string;
+		onInfoPress: () => void;
+	}) => (
+		<View className="border-t border-gray-100 mt-2 pt-2 flex-row justify-between items-center">
+			<MemoizedText className="text-xs text-gray-500 font-medium">
+				Revealed in{" "}
+				{revelationPlace === "makkah" ? "Makkah" : "Madinah"}
+			</MemoizedText>
+
+			<Pressable
+				onPress={onInfoPress}
+				className="bg-gray-100 px-3 py-1 rounded-full"
+			>
+				<MemoizedText className="text-xs text-gray-600 font-medium">
+					Chapter Info
+				</MemoizedText>
+			</Pressable>
+		</View>
+	)
+);
+
+// Optimize main ChapterItem component
+const ChapterItem = React.memo(
+	({ item }: { item: Chapter }) => {
+		// Memoize press handlers
+		const handleChapterPress = useCallback(() => {
 			router.push({
 				pathname: "/(verses)",
 				params: { chapter: item.id, pages: item.pages },
-			})
-		}
-		className="bg-white rounded-xl p-4 mb-3 shadow-sm"
-	>
-		<View className="flex-row justify-between items-center mb-2">
-			<View className="bg-emerald-100 px-3 py-1 rounded-full">
-				<Text className="text-xs text-emerald-700 font-medium">
-					Revelation #{item.revelation_order}
-				</Text>
-			</View>
+			});
+		}, [item.id, item.pages]);
 
-			<View className="bg-gray-100 px-3 py-1 rounded-full">
-				<Text className="text-xs text-gray-600 font-medium">
-					{item.verses_count} verses
-				</Text>
-			</View>
-		</View>
+		const handleInfoPress = useCallback(() => {
+			router.push({
+				pathname: "/(chapters-info)/chapter-info",
+				params: { chapterId: item.id },
+			});
+		}, [item.id]);
 
-		<View className="flex-row justify-between items-center mb-2">
-			<View className="flex-1 ">
-				<Text className="text-lg text-gray-700 font-medium">
-					{item.name_complex}
-				</Text>
-				<Text className="text-sm text-gray-500">
-					{item.translated_name.name}
-				</Text>
-			</View>
-
-			<View className=" rounded-sm items-center justify-center">
-				<Text className="text-3xl text-gray-700 font-medium">
-					{item.id}
-				</Text>
-			</View>
-
-			<Text className="text-2xl flex-1 font-semibold  text-gray-800 text-right">
-				{item.name_arabic}
-			</Text>
-		</View>
-
-		<View className="border-t border-gray-100 mt-2 pt-2 flex-row justify-between items-center">
-			<Text className="text-xs text-gray-500 font-medium">
-				Revealed in{" "}
-				{item.revelation_place === "makkah" ? "Makkah" : "Madinah"}
-			</Text>
-
+		return (
 			<Pressable
-				onPress={() =>
-					router.push({
-						pathname: "/(chapters-info)/chapter-info",
-						params: { chapterId: item.id },
-					})
-				}
-				className="bg-gray-100 px-3 py-1 rounded-full"
+				onPress={handleChapterPress}
+				className="bg-white rounded-xl p-4 mb-3 shadow-sm"
 			>
-				<Text className="text-xs text-gray-600 font-medium">
-					Chapter Info
-				</Text>
+				<ChapterHeader
+					revelationOrder={item.revelation_order}
+					versesCount={item.verses_count}
+				/>
+				<ChapterContent
+					nameComplex={item.name_complex}
+					translatedName={item.translated_name.name}
+					id={item.id}
+					nameArabic={item.name_arabic}
+				/>
+				<ChapterFooter
+					revelationPlace={item.revelation_place}
+					onInfoPress={handleInfoPress}
+				/>
 			</Pressable>
-		</View>
-	</Pressable>
-));
+		);
+	},
+	(prevProps, nextProps) => prevProps.item.id === nextProps.item.id
+);
 
 // Add new type for sort options
 type SortOption = {
@@ -311,8 +390,31 @@ const ChaptersScreen = () => {
 		setDebouncedQuery("");
 	};
 
-	// Memoize the renderItem function
-	const renderItem = React.useCallback(
+	// Optimize getItemLayout with fixed height
+	const ITEM_HEIGHT = 160; // Fixed height for each item
+	const getItemLayout = useCallback(
+		(data: any, index: number) => ({
+			length: ITEM_HEIGHT,
+			offset: ITEM_HEIGHT * index,
+			index,
+		}),
+		[]
+	);
+
+	// Memoize empty list component
+	const ListEmptyComponent = useCallback(
+		() => (
+			<View className="flex-1 items-center justify-center py-8">
+				<MemoizedText className="text-gray-600 text-center">
+					No chapters found matching your search.
+				</MemoizedText>
+			</View>
+		),
+		[]
+	);
+
+	// Memoize renderItem
+	const renderItem = useCallback(
 		({ item }: { item: Chapter }) => <ChapterItem item={item} />,
 		[]
 	);
@@ -330,19 +432,24 @@ const ChaptersScreen = () => {
 			<FlatList
 				data={filteredChapters}
 				renderItem={renderItem}
-				keyExtractor={(item) => item.id.toString()}
+				keyExtractor={useCallback(
+					(item: Chapter) => item.id.toString(),
+					[]
+				)}
 				contentContainerStyle={{ padding: 16 }}
 				removeClippedSubviews={true}
-				maxToRenderPerBatch={10}
-				windowSize={10}
-				initialNumToRender={10}
-				ListEmptyComponent={() => (
-					<View className="flex-1 items-center justify-center py-8">
-						<Text className="text-gray-600 text-center">
-							No chapters found matching your search.
-						</Text>
-					</View>
-				)}
+				maxToRenderPerBatch={3}
+				windowSize={3}
+				initialNumToRender={5}
+				updateCellsBatchingPeriod={75}
+				getItemLayout={getItemLayout}
+				maintainVisibleContentPosition={{
+					minIndexForVisible: 0,
+				}}
+				ListEmptyComponent={ListEmptyComponent}
+				showsVerticalScrollIndicator={false}
+				onEndReachedThreshold={0.5}
+				scrollEventThrottle={16}
 			/>
 			<SortModal
 				visible={isSortModalVisible}

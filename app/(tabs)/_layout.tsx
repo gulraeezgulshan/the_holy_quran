@@ -26,7 +26,7 @@ const TabsLayout = () => {
 			<Tabs.Screen
 				name="chapters"
 				options={{
-					title: "Read",
+					title: "Chapters",
 					tabBarIcon: ({ color, size }) => (
 						<Book color={color} size={size} />
 					),
