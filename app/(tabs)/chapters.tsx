@@ -19,20 +19,6 @@ const ChapterItem = React.memo(({ item }: { item: Chapter }) => (
 		className="bg-white rounded-xl p-4 mb-3 shadow-sm"
 	>
 		<View className="flex-row justify-between items-center mb-2">
-			<Pressable
-				onPress={() =>
-					router.push({
-						pathname: "/(chapters-info)/chapter-info",
-						params: { chapterId: item.id },
-					})
-				}
-				className="bg-gray-100 px-3 py-1 rounded-full"
-			>
-				<Text className="text-xs text-gray-600 font-medium">
-					Chapter Info
-				</Text>
-			</Pressable>
-
 			<View className="bg-emerald-100 px-3 py-1 rounded-full">
 				<Text className="text-xs text-emerald-700 font-medium">
 					Revelation #{item.revelation_order}
@@ -47,31 +33,45 @@ const ChapterItem = React.memo(({ item }: { item: Chapter }) => (
 		</View>
 
 		<View className="flex-row justify-between items-center mb-2">
-			<View className="flex-1 flex-row items-center gap-2">
-				<View className="w-14 h-10 rounded-sm  items-center justify-center">
-					<Text className="text-3xl text-gray-700 font-medium">
-						{item.id}
-					</Text>
-				</View>
-				<View>
-					<Text className="text-lg text-gray-700 font-medium">
-						{item.name_complex}
-					</Text>
-					<Text className="text-sm text-gray-500">
-						{item.translated_name.name}
-					</Text>
-				</View>
+			<View className="flex-1 ">
+				<Text className="text-lg text-gray-700 font-medium">
+					{item.name_complex}
+				</Text>
+				<Text className="text-sm text-gray-500">
+					{item.translated_name.name}
+				</Text>
 			</View>
-			<Text className="text-2xl font-semibold text-gray-800 text-right ml-4">
+
+			<View className=" rounded-sm items-center justify-center">
+				<Text className="text-3xl text-gray-700 font-medium">
+					{item.id}
+				</Text>
+			</View>
+
+			<Text className="text-2xl flex-1 font-semibold  text-gray-800 text-right">
 				{item.name_arabic}
 			</Text>
 		</View>
 
-		<View className="border-t border-gray-100 mt-2 pt-2">
+		<View className="border-t border-gray-100 mt-2 pt-2 flex-row justify-between items-center">
 			<Text className="text-xs text-gray-500 font-medium">
 				Revealed in{" "}
 				{item.revelation_place === "makkah" ? "Makkah" : "Madinah"}
 			</Text>
+
+			<Pressable
+				onPress={() =>
+					router.push({
+						pathname: "/(chapters-info)/chapter-info",
+						params: { chapterId: item.id },
+					})
+				}
+				className="bg-gray-100 px-3 py-1 rounded-full"
+			>
+				<Text className="text-xs text-gray-600 font-medium">
+					Chapter Info
+				</Text>
+			</Pressable>
 		</View>
 	</Pressable>
 ));
@@ -96,7 +96,7 @@ const SearchHeader = React.memo(
 					<TextInput
 						ref={searchInputRef}
 						className="flex-1 ml-2 text-base text-gray-900"
-						placeholder="Search chapters..."
+						placeholder="Search by name, number or translation"
 						value={searchQuery}
 						onChangeText={handleSearch}
 						placeholderTextColor="#9CA3AF"
