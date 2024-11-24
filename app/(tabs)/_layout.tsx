@@ -1,6 +1,6 @@
 import React from "react";
 import { Tabs } from "expo-router";
-import { Book, Bookmark, Headphones, Search } from "lucide-react-native";
+import { Book, Bookmark, Headphones, Search, Heart } from "lucide-react-native";
 
 const TabsLayout = () => {
 	return (
@@ -56,6 +56,15 @@ const TabsLayout = () => {
 					title: "Search",
 					tabBarIcon: ({ color, size }) => (
 						<Search color={color} size={size} />
+					),
+				}}
+			/>
+			<Tabs.Screen
+				name="dua"
+				options={{
+					title: "Dua",
+					tabBarIcon: ({ color, size }) => (
+						<Heart color={color} size={size} />
 					),
 				}}
 			/>
