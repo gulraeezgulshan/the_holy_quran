@@ -11,9 +11,10 @@ import { fetchChapterAudio } from "../../query/verses";
 import * as FileSystem from "expo-file-system";
 import { Audio } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
-import { useQuery, useQueries, useQueryClient } from "@tanstack/react-query";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 import RecitorSelector from "../../components/recitor-selector";
 import { useStore } from "../../store";
+import { FontAwesome } from "@expo/vector-icons";
 
 type DownloadProgress = {
 	[key: string]: number;
@@ -218,13 +219,18 @@ const ListenQuranScreen = () => {
 		const storageKey = getStorageKey(item.id);
 
 		return (
-			<View className="flex-row justify-between items-center bg-white p-4 rounded-xl mb-3 shadow-sm">
+			<View className="flex-row justify-between items-center bg-gray-800 p-4 rounded-xl mb-3 shadow-lg border border-gray-700">
 				<View className="flex-1">
-					<Text className="text-xl font-semibold mb-1">
+					<Text
+						className="text-2xl font-semibold mb-1 text-gray-100"
+						style={{ fontFamily: "me_quran-2" }}
+					>
 						{item.name_arabic}
 					</Text>
-					<Text className="text-base mb-0.5">{item.name_simple}</Text>
-					<Text className="text-sm text-gray-500">
+					<Text className="text-base mb-0.5 text-gray-300">
+						{item.name_simple}
+					</Text>
+					<Text className="text-sm text-gray-400">
 						{item.translated_name.name}
 					</Text>
 				</View>
@@ -233,11 +239,12 @@ const ListenQuranScreen = () => {
 						<Pressable
 							onPress={() => handlePlayback(item.id)}
 							disabled={isLoading[item.id]}
-							className={`px-4 py-2 rounded-lg ${
-								isLoading[item.id]
-									? "bg-green-400"
-									: "bg-green-500"
-							}`}
+							className={`p-3 rounded-full ${
+								currentlyPlaying === item.id &&
+								playbackStatus[item.id]?.isPlaying
+									? "bg-emerald-600"
+									: "bg-emerald-500"
+							} ${isLoading[item.id] ? "opacity-70" : ""}`}
 						>
 							{isLoading[item.id] ? (
 								<ActivityIndicator size="small" color="white" />
@@ -256,9 +263,9 @@ const ListenQuranScreen = () => {
 						</Pressable>
 						{playbackStatus[item.id] && (
 							<View className="w-full mt-2">
-								<View className="h-1 bg-gray-200 rounded-full">
+								<View className="h-1 bg-gray-700 rounded-full">
 									<View
-										className="h-1 bg-green-500 rounded-full"
+										className="h-1 bg-emerald-500 rounded-full"
 										style={{
 											width: `${
 												(playbackStatus[item.id]
@@ -279,13 +286,13 @@ const ListenQuranScreen = () => {
 						disabled={downloadState[storageKey] === "downloading"}
 						className={`px-4 py-2 rounded-lg ${
 							downloadState[storageKey] === "downloading"
-								? "bg-gray-400"
+								? "bg-gray-600"
 								: downloadState[storageKey] === "error"
-								? "bg-red-500"
-								: "bg-blue-500"
+								? "bg-red-500/80"
+								: "bg-emerald-500"
 						}`}
 					>
-						<Text className="text-white font-medium">
+						<Text className="text-gray-100 font-medium">
 							{downloadState[storageKey] === "downloading"
 								? downloadProgress[storageKey]
 									? `${Math.round(
@@ -326,21 +333,34 @@ const ListenQuranScreen = () => {
 	}, [selectedRecitor]);
 
 	return (
-		<View className="flex-1">
+		<View className="flex-1 bg-gray-900">
 			<FlatList
 				data={chapters}
 				renderItem={renderChapterCard}
 				keyExtractor={(item) => item.id.toString()}
 				contentContainerStyle={{ padding: 16 }}
-				className="bg-gray-50"
+				className="bg-gray-900"
+				showsVerticalScrollIndicator={false}
+				ListEmptyComponent={() => (
+					<View className="flex-1 items-center justify-center py-8">
+						<Text className="text-gray-400 text-center">
+							No chapters available.
+						</Text>
+					</View>
+				)}
 			/>
 
-			<View className="absolute right-8 bottom-8 w-14 h-14 ">
+			<View className="absolute right-8 bottom-8 w-14 h-14">
+				<Pressable
+					className="h-14 w-14 bg-emerald-600 rounded-full items-center justify-center shadow-lg"
+					onPress={() => setIsRecitorModalVisible(true)}
+				>
+					<FontAwesome name="microphone" size={24} color="white" />
+				</Pressable>
 				<RecitorSelector
 					isVisible={isRecitorModalVisible}
-					onClose={() =>
-						setIsRecitorModalVisible(!isRecitorModalVisible)
-					}
+					onClose={() => setIsRecitorModalVisible(false)}
+					showButton={false}
 				/>
 			</View>
 		</View>

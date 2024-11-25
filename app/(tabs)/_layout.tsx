@@ -1,4 +1,3 @@
-import React from "react";
 import { Tabs } from "expo-router";
 import { Book, Bookmark, Headphones, Search, Heart } from "lucide-react-native";
 
@@ -8,18 +7,26 @@ const TabsLayout = () => {
 			screenOptions={{
 				headerShown: false,
 				tabBarStyle: {
-					height: 60,
-					paddingBottom: 8,
-					paddingTop: 8,
-					backgroundColor: "#ffffff",
-					borderTopWidth: 1,
-					borderTopColor: "#e5e5e5",
+					height: 65,
+					paddingBottom: 10,
+					paddingTop: 10,
+					backgroundColor: "#111827",
+					borderTopColor: "#111827",
+					shadowColor: "#111827",
+					shadowOffset: {
+						width: 0,
+						height: -4,
+					},
+					shadowOpacity: 0.1,
+					shadowRadius: 4,
+					elevation: 5,
 				},
-				tabBarActiveTintColor: "#0066cc",
-				tabBarInactiveTintColor: "#666666",
+				tabBarActiveTintColor: "#10B981",
+				tabBarInactiveTintColor: "#9CA3AF",
 				tabBarLabelStyle: {
 					fontSize: 12,
 					fontWeight: "500",
+					marginTop: 4,
 				},
 			}}
 		>
@@ -28,7 +35,7 @@ const TabsLayout = () => {
 				options={{
 					title: "Chapters",
 					tabBarIcon: ({ color, size }) => (
-						<Book color={color} size={size} />
+						<Book color={color} size={size} strokeWidth={2} />
 					),
 				}}
 			/>
@@ -37,7 +44,7 @@ const TabsLayout = () => {
 				options={{
 					title: "Bookmarks",
 					tabBarIcon: ({ color, size }) => (
-						<Bookmark color={color} size={size} />
+						<Bookmark color={color} size={size} strokeWidth={2} />
 					),
 				}}
 			/>
@@ -46,7 +53,7 @@ const TabsLayout = () => {
 				options={{
 					title: "Listen",
 					tabBarIcon: ({ color, size }) => (
-						<Headphones color={color} size={size} />
+						<Headphones color={color} size={size} strokeWidth={2} />
 					),
 				}}
 			/>
@@ -55,7 +62,7 @@ const TabsLayout = () => {
 				options={{
 					title: "Search",
 					tabBarIcon: ({ color, size }) => (
-						<Search color={color} size={size} />
+						<Search color={color} size={size} strokeWidth={2} />
 					),
 				}}
 			/>
@@ -64,7 +71,7 @@ const TabsLayout = () => {
 				options={{
 					title: "Dua",
 					tabBarIcon: ({ color, size }) => (
-						<Heart color={color} size={size} />
+						<Heart color={color} size={size} strokeWidth={2} />
 					),
 				}}
 			/>

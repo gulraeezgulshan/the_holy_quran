@@ -16,20 +16,22 @@ import debounce from "lodash/debounce";
 
 // Optimize ChapterItem by extracting sub-components
 const RevelationBadge = React.memo(({ order }: { order: number }) => (
-	<View className="bg-emerald-100 px-3 py-1 rounded-full">
-		<Text className="text-xs text-emerald-700 font-medium">
+	<View className="bg-emerald-900/30 px-3 py-1 rounded-full">
+		<Text className="text-xs text-emerald-400 font-medium">
 			Revelation #{order}
 		</Text>
 	</View>
 ));
+RevelationBadge.displayName = "RevelationBadge";
 
 const VerseCountBadge = React.memo(({ count }: { count: number }) => (
-	<View className="bg-gray-100 px-3 py-1 rounded-full">
-		<Text className="text-xs text-gray-600 font-medium">
+	<View className="bg-gray-800 px-3 py-1 rounded-full">
+		<Text className="text-xs text-gray-400 font-medium">
 			{count} verses
 		</Text>
 	</View>
 ));
+VerseCountBadge.displayName = "VerseCountBadge";
 
 // Create a memoized text component for better performance
 const MemoizedText = React.memo(
@@ -41,6 +43,7 @@ const MemoizedText = React.memo(
 		className: string;
 	}) => <Text className={className}>{children}</Text>
 );
+MemoizedText.displayName = "MemoizedText";
 
 // Optimize ChapterItem even further by breaking it into smaller components
 const ChapterHeader = React.memo(
@@ -57,6 +60,7 @@ const ChapterHeader = React.memo(
 		</View>
 	)
 );
+ChapterHeader.displayName = "ChapterHeader";
 
 const ChapterContent = React.memo(
 	({
@@ -72,26 +76,27 @@ const ChapterContent = React.memo(
 	}) => (
 		<View className="flex-row justify-between items-center mb-2">
 			<View className="flex-1">
-				<MemoizedText className="text-lg text-gray-700 font-medium">
+				<MemoizedText className="text-lg text-gray-200 font-medium">
 					{nameComplex}
 				</MemoizedText>
-				<MemoizedText className="text-sm text-gray-500">
+				<MemoizedText className="text-sm text-gray-400">
 					{translatedName}
 				</MemoizedText>
 			</View>
 
 			<View className="rounded-sm items-center justify-center">
-				<MemoizedText className="text-3xl text-gray-700 font-medium">
+				<MemoizedText className="text-3xl text-emerald-400 font-medium">
 					{id}
 				</MemoizedText>
 			</View>
 
-			<MemoizedText className="text-2xl flex-1 font-semibold text-gray-800 text-right">
+			<MemoizedText className="text-2xl flex-1 font-semibold text-gray-100 text-right">
 				{nameArabic}
 			</MemoizedText>
 		</View>
 	)
 );
+ChapterContent.displayName = "ChapterContent";
 
 const ChapterFooter = React.memo(
 	({
@@ -101,23 +106,24 @@ const ChapterFooter = React.memo(
 		revelationPlace: string;
 		onInfoPress: () => void;
 	}) => (
-		<View className="border-t border-gray-100 mt-2 pt-2 flex-row justify-between items-center">
-			<MemoizedText className="text-xs text-gray-500 font-medium">
+		<View className="border-t border-gray-700 mt-2 pt-2 flex-row justify-between items-center">
+			<MemoizedText className="text-xs text-gray-400 font-medium">
 				Revealed in{" "}
 				{revelationPlace === "makkah" ? "Makkah" : "Madinah"}
 			</MemoizedText>
 
 			<Pressable
 				onPress={onInfoPress}
-				className="bg-gray-100 px-3 py-1 rounded-full"
+				className="bg-gray-700 px-3 py-1 rounded-full"
 			>
-				<MemoizedText className="text-xs text-gray-600 font-medium">
+				<MemoizedText className="text-xs text-emerald-400 font-medium">
 					Chapter Info
 				</MemoizedText>
 			</Pressable>
 		</View>
 	)
 );
+ChapterFooter.displayName = "ChapterFooter";
 
 // Optimize main ChapterItem component
 const ChapterItem = React.memo(
@@ -140,7 +146,7 @@ const ChapterItem = React.memo(
 		return (
 			<Pressable
 				onPress={handleChapterPress}
-				className="bg-white rounded-xl p-4 mb-3 shadow-sm"
+				className="bg-gray-800 rounded-xl p-4 mb-3 shadow-lg"
 			>
 				<ChapterHeader
 					revelationOrder={item.revelation_order}
@@ -161,6 +167,7 @@ const ChapterItem = React.memo(
 	},
 	(prevProps, nextProps) => prevProps.item.id === nextProps.item.id
 );
+ChapterItem.displayName = "ChapterItem";
 
 // Add new type for sort options
 type SortOption = {
@@ -261,6 +268,7 @@ const SortModal = React.memo(
 		);
 	}
 );
+SortModal.displayName = "SortModal";
 
 // Update SearchHeader to include sort button
 const SearchHeader = React.memo(
@@ -278,17 +286,17 @@ const SearchHeader = React.memo(
 		const searchInputRef = React.useRef<TextInput>(null);
 
 		return (
-			<View className="mb-2">
+			<View className="mb-2 mt-4">
 				<View className="flex-row items-center gap-2">
-					<View className="flex-1 flex-row items-center bg-white rounded-lg px-4 py-2 border border-gray-200">
-						<FontAwesome name="search" size={16} color="#6B7280" />
+					<View className="flex-1 flex-row items-center bg-gray-800 rounded-lg px-4 py-2 border border-gray-700">
+						<FontAwesome name="search" size={16} color="#9CA3AF" />
 						<TextInput
 							ref={searchInputRef}
-							className="flex-1 ml-2 text-base text-gray-900"
+							className="flex-1 ml-2 text-base text-gray-100"
 							placeholder="Search by name, number or translation"
 							value={searchQuery}
 							onChangeText={handleSearch}
-							placeholderTextColor="#9CA3AF"
+							placeholderTextColor="#6B7280"
 							autoCorrect={false}
 							returnKeyType="search"
 							clearButtonMode="while-editing"
@@ -297,12 +305,7 @@ const SearchHeader = React.memo(
 							onSubmitEditing={() => {}}
 						/>
 						{searchQuery ? (
-							<Pressable
-								onPress={() => {
-									clearSearch();
-									searchInputRef.current?.focus();
-								}}
-							>
+							<Pressable onPress={clearSearch}>
 								<FontAwesome
 									name="times-circle"
 									size={16}
@@ -313,12 +316,12 @@ const SearchHeader = React.memo(
 					</View>
 					<Pressable
 						onPress={onSortPress}
-						className="bg-white min-h-12 min-w-12 items-center justify-center rounded-lg border border-gray-200"
+						className="bg-gray-800 min-h-12 min-w-12 items-center justify-center rounded-lg border border-gray-700"
 					>
 						<FontAwesome
 							name="sort-amount-asc"
 							size={20}
-							color="#6B7280"
+							color="#9CA3AF"
 						/>
 					</Pressable>
 				</View>
@@ -326,6 +329,7 @@ const SearchHeader = React.memo(
 		);
 	}
 );
+SearchHeader.displayName = "SearchHeader";
 
 const ChaptersScreen = () => {
 	const [searchQuery, setSearchQuery] = useState("");
@@ -420,8 +424,8 @@ const ChaptersScreen = () => {
 	);
 
 	return (
-		<SafeAreaView className="flex-1 bg-gray-50">
-			<View className="px-4 bg-gray-50">
+		<SafeAreaView className="flex-1 bg-gray-900">
+			<View className="px-4 bg-gray-900">
 				<SearchHeader
 					searchQuery={searchQuery}
 					handleSearch={handleSearch}

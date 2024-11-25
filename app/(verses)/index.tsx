@@ -3,15 +3,13 @@ import {
 	Text,
 	SafeAreaView,
 	FlatList,
-	Modal,
 	Pressable,
-	Image,
 	TextInput,
 } from "react-native";
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { useLocalSearchParams } from "expo-router";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { fetchVersesByChapter, fetchRecitations } from "../../query/verses";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { fetchVersesByChapter } from "../../query/verses";
 import { Verse } from "../../types";
 import VerseAudioPlayer from "../../components/verse-audio-player";
 import { useStore } from "../../store";
@@ -20,8 +18,6 @@ import RecitorSelector from "../../components/recitor-selector";
 
 const VersesScreen = () => {
 	const { chapter, pages } = useLocalSearchParams();
-	const [currentPage, setCurrentPage] = useState(1);
-	const [allVerses, setAllVerses] = useState<Verse[]>([]);
 	const [currentlyPlayingVerseKey, setCurrentlyPlayingVerseKey] = useState<
 		string | null
 	>(null);
@@ -118,32 +114,32 @@ const VersesScreen = () => {
 
 	const renderVerseItem = ({ item: verse }: { item: Verse }) => (
 		<SafeAreaView
-			className={`mb-6 p-5 bg-white rounded-xl shadow-sm border ${
+			className={`mb-6 p-5 bg-gray-800 rounded-xl shadow-lg border ${
 				currentlyPlayingVerseKey === verse.verse_key
-					? "border-indigo-500 bg-indigo-50"
-					: "border-gray-100"
+					? "border-emerald-500/30 bg-emerald-900/20"
+					: "border-gray-700"
 			}`}
 		>
 			<Text
 				className={`text-2xl leading-10 font-medium mb-3 text-right ${
 					currentlyPlayingVerseKey === verse.verse_key
-						? "text-indigo-700"
-						: "text-gray-900"
+						? "text-emerald-400"
+						: "text-gray-100"
 				}`}
 				style={{ fontFamily: "me_quran-2" }}
 			>
 				{verse.text_uthmani}
 			</Text>
-			<Text className="text-base text-gray-700 mb-4 text-right">
+			<Text className="text-base text-gray-300 mb-4 text-right">
 				{verse.words.map((word) => word.translation.text).join(" ")}
 			</Text>
 			<View className="flex-row items-center justify-between">
 				<View className="flex-row items-center">
-					<Text className="text-sm text-gray-600">
+					<Text className="text-sm text-gray-400">
 						Verse {verse.verse_number}
 					</Text>
-					<Text className="text-gray-400 mx-2">•</Text>
-					<Text className="text-sm text-gray-600">
+					<Text className="text-gray-600 mx-2">•</Text>
+					<Text className="text-sm text-gray-400">
 						{verse.verse_key}
 					</Text>
 				</View>
@@ -178,9 +174,9 @@ const VersesScreen = () => {
 
 	if (isLoading) {
 		return (
-			<SafeAreaView className="flex-1 bg-gray-50 mt-4">
+			<SafeAreaView className="flex-1 bg-gray-900 mt-4">
 				<View className="flex-1 items-center justify-center">
-					<Text className="text-gray-700 text-lg">
+					<Text className="text-gray-300 text-lg">
 						Loading verses...
 					</Text>
 				</View>
@@ -190,9 +186,9 @@ const VersesScreen = () => {
 
 	if (error) {
 		return (
-			<SafeAreaView className="flex-1 bg-slate-50">
+			<SafeAreaView className="flex-1 bg-gray-900">
 				<View className="flex-1 items-center justify-center p-4">
-					<Text className="text-red-600 text-center">
+					<Text className="text-red-400 text-center">
 						{(error as Error).message}
 					</Text>
 				</View>
@@ -201,28 +197,28 @@ const VersesScreen = () => {
 	}
 
 	return (
-		<SafeAreaView className="flex-1 bg-gray-50">
-			<View className="px-4 bg-gray-50">
+		<SafeAreaView className="flex-1 bg-gray-900">
+			<View className="px-4 bg-gray-900">
 				<View className="mb-6">
-					<Text className="text-2xl font-bold text-slate-800 mb-2">
+					<Text className="text-2xl font-bold text-gray-100 mb-2">
 						Chapter {chapter}
 					</Text>
-					<Text className="text-base text-slate-600">
+					<Text className="text-base text-gray-400">
 						Page {pages}
 					</Text>
 					<View className="mt-4">
-						<View className="flex-row items-center bg-white rounded-lg px-4 py-2 border border-gray-200">
+						<View className="flex-row items-center bg-gray-800 rounded-lg px-4 py-2 border border-gray-700">
 							<FontAwesome
 								name="search"
 								size={16}
-								color="#6B7280"
+								color="#9CA3AF"
 							/>
 							<TextInput
-								className="flex-1 ml-2 text-base text-gray-900"
+								className="flex-1 ml-2 text-base text-gray-100"
 								placeholder="Search verses..."
 								value={searchQuery}
 								onChangeText={setSearchQuery}
-								placeholderTextColor="#9CA3AF"
+								placeholderTextColor="#6B7280"
 							/>
 							{searchQuery ? (
 								<Pressable onPress={() => setSearchQuery("")}>
@@ -251,7 +247,7 @@ const VersesScreen = () => {
 				ListFooterComponent={() =>
 					isFetchingNextPage ? (
 						<View className="py-4">
-							<Text className="text-center text-gray-600">
+							<Text className="text-center text-gray-400">
 								Loading more verses...
 							</Text>
 						</View>
@@ -259,7 +255,7 @@ const VersesScreen = () => {
 				}
 				ListEmptyComponent={() => (
 					<View className="flex-1 items-center justify-center py-8">
-						<Text className="text-gray-600 text-center">
+						<Text className="text-gray-400 text-center">
 							No verses found matching your search.
 						</Text>
 					</View>
@@ -267,7 +263,7 @@ const VersesScreen = () => {
 			/>
 			<View className="absolute right-8 bottom-8 w-14 h-14">
 				<Pressable
-					className="h-14 w-14 bg-blue-500 rounded-full items-center justify-center shadow-lg"
+					className="h-14 w-14 bg-emerald-600 rounded-full items-center justify-center shadow-lg"
 					onPress={() => {
 						console.log("Opening modal");
 						setIsRecitorModalVisible(true);

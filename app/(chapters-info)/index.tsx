@@ -1,10 +1,4 @@
-import {
-	View,
-	Text,
-	ScrollView,
-	LogBox,
-	ActivityIndicator,
-} from "react-native";
+import { View, Text, ActivityIndicator } from "react-native";
 import React from "react";
 import { useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -16,7 +10,6 @@ import { useWindowDimensions } from "react-native";
 
 const ChapterInfo = () => {
 	const params = useLocalSearchParams<{ chapterId: string }>();
-	const { width } = useWindowDimensions();
 
 	const { data, isLoading, error } = useQuery<ChapterInfoResponse>({
 		queryKey: ["chapterInfo", params.chapterId],

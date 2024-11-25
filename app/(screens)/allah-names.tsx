@@ -5,7 +5,6 @@ import {
 	TouchableOpacity,
 	Dimensions,
 	Pressable,
-	ImageBackground,
 	Image,
 } from "react-native";
 import React from "react";
