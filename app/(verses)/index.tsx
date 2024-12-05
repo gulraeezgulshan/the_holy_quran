@@ -461,6 +461,28 @@ const VersesScreen = () => {
 									playNextVerse(currentVerse.verse_key);
 								}
 							}}
+							onNext={() => {
+								playNextVerse(currentVerse.verse_key);
+							}}
+							onPrevious={() => {
+								const [currentChapter, currentVerseNumber] =
+									currentVerse.verse_key.split(":");
+								const previousVerseNumber =
+									parseInt(currentVerseNumber) - 1;
+								const previousVerseKey = `${currentChapter}:${previousVerseNumber}`;
+
+								const previousVerse = flattenedVerses.find(
+									(v) => v.verse_key === previousVerseKey
+								);
+								if (previousVerse) {
+									setCurrentVerse(previousVerse);
+									setCurrentlyPlayingVerseKey(
+										previousVerseKey
+									);
+									setIsAutoPlaying(true);
+									scrollToVerse(previousVerseKey);
+								}
+							}}
 						/>
 					</View>
 					<Pressable

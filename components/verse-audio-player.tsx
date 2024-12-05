@@ -10,6 +10,8 @@ interface VerseAudioPlayerProps {
 	isCurrentlyPlaying: boolean;
 	onPlaybackStatusChange: (isPlaying: boolean) => void;
 	onPlaybackComplete: () => void;
+	onNext: () => void;
+	onPrevious: () => void;
 }
 
 const VerseAudioPlayer = ({
@@ -18,6 +20,8 @@ const VerseAudioPlayer = ({
 	isCurrentlyPlaying,
 	onPlaybackStatusChange,
 	onPlaybackComplete,
+	onNext,
+	onPrevious,
 }: VerseAudioPlayerProps) => {
 	const [sound, setSound] = useState<Audio.Sound | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
@@ -127,9 +131,7 @@ const VerseAudioPlayer = ({
 					<View className="flex-row items-center space-x-8">
 						<TouchableOpacity
 							className="w-10 h-10 items-center justify-center"
-							onPress={() => {
-								/* Logic for previous */
-							}}
+							onPress={onPrevious}
 						>
 							<Ionicons
 								name="play-skip-back"
@@ -165,9 +167,7 @@ const VerseAudioPlayer = ({
 
 						<TouchableOpacity
 							className="w-10 h-10 items-center justify-center"
-							onPress={() => {
-								/* Logic for next */
-							}}
+							onPress={onNext}
 						>
 							<Ionicons
 								name="play-skip-forward"
