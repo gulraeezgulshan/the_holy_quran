@@ -65,6 +65,10 @@ export type VerseResponse = {
     };
 };
 
+export type SingleVerseResponse = {
+    verse: Verse;
+};
+
 export interface Recitation {
     id: number;
     reciter_name: string;

@@ -17,6 +17,9 @@ import {
 import { useState, useEffect } from "react";
 import { router } from "expo-router";
 import { allahNames } from "../data/allah_name";
+import { useQuery } from "@tanstack/react-query";
+import { fetchRandomVerse } from "../query/verses";
+import VerseItem from "../components/verse-item";
 
 const dailyItems = {
 	ayat: {
@@ -42,6 +45,11 @@ export default function App() {
 	const [activeTab, setActiveTab] = useState("ayat");
 	const [randomName, setRandomName] = useState(allahNames[0]);
 
+	const { data: randomVerse, isLoading } = useQuery({
+		queryKey: ["randomVerse"],
+		queryFn: fetchRandomVerse,
+	});
+
 	useEffect(() => {
 		const randomIndex = Math.floor(Math.random() * allahNames.length);
 		setRandomName(allahNames[randomIndex]);
@@ -52,9 +60,23 @@ export default function App() {
 			<Text className="text-lg font-bold text-gray-100 mb-2">
 				{dailyItems[activeTab].title}
 			</Text>
-			<Text className="text-gray-300">
-				{dailyItems[activeTab].content}
-			</Text>
+			{activeTab === "ayat" ? (
+				isLoading ? (
+					<Text className="text-gray-300">Loading...</Text>
+				) : (
+					<VerseItem
+						verse={randomVerse.verse}
+						currentlyPlayingVerseKey={null}
+						isAutoPlaying={false}
+						onPlaybackStatusChange={() => {}}
+						onPlaybackComplete={() => {}}
+					/>
+				)
+			) : (
+				<Text className="text-gray-300">
+					{dailyItems[activeTab].content}
+				</Text>
+			)}
 		</View>
 	);
 
@@ -65,7 +87,7 @@ export default function App() {
 					source={require("../assets/images/background_1.jpg")}
 					className="w-full h-[250px] object-cover"
 				/>
-				<View className="absolute bottom-0 w-full translate-y-1/2 px-4">
+				<View className="absolute bottom-0 w-full translate-y-1/2 px-4 z-10">
 					<View className="bg-gray-800 rounded-xl shadow-lg flex-row items-center px-4 py-3">
 						<Search size={20} color="#9CA3AF" className="mr-2" />
 						<TextInput

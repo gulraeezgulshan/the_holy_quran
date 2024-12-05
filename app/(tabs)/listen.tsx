@@ -147,10 +147,8 @@ const ListenQuranScreen = () => {
 
 	const handlePlayback = async (chapterId: number) => {
 		try {
-			// Set loading state
 			setIsLoading((prev) => ({ ...prev, [chapterId]: true }));
 
-			// If clicking the same chapter that's currently playing
 			if (currentlyPlaying === chapterId && sound) {
 				const status = await sound.getStatusAsync();
 				if (status.isLoaded) {
@@ -164,12 +162,11 @@ const ListenQuranScreen = () => {
 				return;
 			}
 
-			// Stop and unload current audio if playing something else
 			if (sound) {
 				await sound.stopAsync();
 				await sound.unloadAsync();
 				setSound(null);
-				// Clear the playback status for the previous chapter
+
 				if (currentlyPlaying) {
 					setPlaybackStatus((prev) => {
 						const newStatus = { ...prev };
@@ -179,7 +176,6 @@ const ListenQuranScreen = () => {
 				}
 			}
 
-			// Start playing the new chapter
 			const audioUri =
 				FileSystem.documentDirectory +
 				`chapter_${chapterId}_recitor_${
@@ -318,16 +314,15 @@ const ListenQuranScreen = () => {
 	}, [sound]);
 
 	useEffect(() => {
-		// Stop current playback when recitor changes
 		if (sound) {
 			sound.stopAsync();
 			sound.unloadAsync();
 			setSound(null);
 			setCurrentlyPlaying(null);
 		}
-		// Invalidate all chapter file queries when recitor changes
+
 		queryClient.invalidateQueries({ queryKey: ["chapterFile"] });
-		// Clear download states and progress when recitor changes
+
 		setDownloadState({});
 		setDownloadProgress({});
 	}, [selectedRecitor]);

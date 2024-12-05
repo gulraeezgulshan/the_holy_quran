@@ -33,7 +33,6 @@ const AllahNamesScreen = () => {
 				className="bg-gray-800 mx-4 rounded-3xl shadow-lg overflow-hidden"
 				style={{ minHeight: screenHeight * 0.6 }}
 			>
-				{/* Progress Bar */}
 				<View className="h-1 bg-gray-700">
 					<View
 						className="h-1 bg-emerald-500"
@@ -45,14 +44,11 @@ const AllahNamesScreen = () => {
 					/>
 				</View>
 
-				{/* Content */}
 				<View className="p-8 items-center justify-between flex-1">
-					{/* Counter */}
 					<Text className="text-gray-400 font-medium">
 						{currentIndex + 1} / {allahNames.length}
 					</Text>
 
-					{/* Main Content */}
 					<View className="items-center flex-1 justify-center">
 						<Pressable onPress={goToNext}>
 							<View className="flex-1 items-center justify-center">
@@ -101,7 +97,6 @@ const AllahNamesScreen = () => {
 						</Pressable>
 					</View>
 
-					{/* Navigation Buttons */}
 					<View className="flex-row justify-between w-full mt-8">
 						<TouchableOpacity
 							onPress={goToPrevious}

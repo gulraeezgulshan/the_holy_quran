@@ -7,6 +7,7 @@ const ScreenLayout = () => {
 			<Stack.Screen
 				name="allah-names"
 				options={{
+					animation: "none",
 					title: "99 Names of Allah",
 					headerStyle: { backgroundColor: "#111827" },
 					headerTintColor: "#fff",

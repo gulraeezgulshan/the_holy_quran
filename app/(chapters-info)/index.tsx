@@ -6,7 +6,6 @@ import { useQuery } from "@tanstack/react-query";
 import { getChapterInfo } from "../../query/verses";
 import { ChapterInfoResponse } from "../../types";
 import WebView from "react-native-webview";
-import { useWindowDimensions } from "react-native";
 
 const ChapterInfo = () => {
 	const params = useLocalSearchParams<{ chapterId: string }>();

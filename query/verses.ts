@@ -1,4 +1,4 @@
-import { RecitationsResponse, VerseResponse } from "../types";
+import { RecitationsResponse, SingleVerseResponse, VerseResponse } from "../types";
 
 const BASE_URL = "https://api.quran.com/api/v4";
 
@@ -79,4 +79,21 @@ export const getChapterInfo = async (chapterId: string, language: string = 'ur')
     }
 
     return response.json();
+};
+
+export const fetchRandomVerse = async () => {
+    const response = await fetch(
+        `${BASE_URL}/verses/random?language=ur&words=true&fields=text_uthmani`,
+        {
+            headers: {
+                'Accept': 'application/json'
+            }
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+
+    return response.json() as Promise<SingleVerseResponse>;
 };

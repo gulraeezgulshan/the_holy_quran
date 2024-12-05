@@ -14,7 +14,6 @@ import { Chapter } from "../../types";
 import { FontAwesome } from "@expo/vector-icons";
 import debounce from "lodash/debounce";
 
-// Optimize ChapterItem by extracting sub-components
 const RevelationBadge = React.memo(({ order }: { order: number }) => (
 	<View className="bg-emerald-900/30 px-3 py-1 rounded-full">
 		<Text className="text-xs text-emerald-400 font-medium">
@@ -33,7 +32,6 @@ const VerseCountBadge = React.memo(({ count }: { count: number }) => (
 ));
 VerseCountBadge.displayName = "VerseCountBadge";
 
-// Create a memoized text component for better performance
 const MemoizedText = React.memo(
 	({
 		children,
@@ -45,7 +43,6 @@ const MemoizedText = React.memo(
 );
 MemoizedText.displayName = "MemoizedText";
 
-// Optimize ChapterItem even further by breaking it into smaller components
 const ChapterHeader = React.memo(
 	({
 		revelationOrder,
@@ -125,14 +122,18 @@ const ChapterFooter = React.memo(
 );
 ChapterFooter.displayName = "ChapterFooter";
 
-// Optimize main ChapterItem component
 const ChapterItem = React.memo(
 	({ item }: { item: Chapter }) => {
-		// Memoize press handlers
 		const handleChapterPress = useCallback(() => {
 			router.push({
 				pathname: "/(verses)",
-				params: { chapter: item.id, pages: item.pages },
+				params: {
+					chapter: item.id,
+					pages: item.pages,
+					nameArabic: item.name_arabic,
+					revelationPlace: item.revelation_place,
+					versesCount: item.verses_count,
+				},
 			});
 		}, [item.id, item.pages]);
 
@@ -169,14 +170,12 @@ const ChapterItem = React.memo(
 );
 ChapterItem.displayName = "ChapterItem";
 
-// Add new type for sort options
 type SortOption = {
 	label: string;
 	key: "id" | "name_simple" | "revelation_order";
 	direction: "asc" | "desc";
 };
 
-// Add new component for sort modal
 const SortModal = React.memo(
 	({
 		visible,
@@ -270,7 +269,6 @@ const SortModal = React.memo(
 );
 SortModal.displayName = "SortModal";
 
-// Update SearchHeader to include sort button
 const SearchHeader = React.memo(
 	({
 		searchQuery,
@@ -341,7 +339,6 @@ const ChaptersScreen = () => {
 		direction: "asc",
 	});
 
-	// Create a debounced search function
 	const debouncedSearch = useCallback(
 		debounce((text: string) => {
 			setDebouncedQuery(text);
@@ -349,7 +346,6 @@ const ChaptersScreen = () => {
 		[]
 	);
 
-	// Update filteredChapters to use debouncedQuery instead
 	const filteredChapters = useMemo(() => {
 		const mapChapter = (chapter: any) => ({
 			...chapter,
@@ -374,7 +370,6 @@ const ChaptersScreen = () => {
 			});
 		}
 
-		// Apply sorting
 		return results.sort((a, b) => {
 			const multiplier = selectedSort.direction === "asc" ? 1 : -1;
 			return (
@@ -394,8 +389,7 @@ const ChaptersScreen = () => {
 		setDebouncedQuery("");
 	};
 
-	// Optimize getItemLayout with fixed height
-	const ITEM_HEIGHT = 160; // Fixed height for each item
+	const ITEM_HEIGHT = 160;
 	const getItemLayout = useCallback(
 		(data: any, index: number) => ({
 			length: ITEM_HEIGHT,
@@ -405,7 +399,6 @@ const ChaptersScreen = () => {
 		[]
 	);
 
-	// Memoize empty list component
 	const ListEmptyComponent = useCallback(
 		() => (
 			<View className="flex-1 items-center justify-center py-8">
@@ -417,7 +410,6 @@ const ChaptersScreen = () => {
 		[]
 	);
 
-	// Memoize renderItem
 	const renderItem = useCallback(
 		({ item }: { item: Chapter }) => <ChapterItem item={item} />,
 		[]

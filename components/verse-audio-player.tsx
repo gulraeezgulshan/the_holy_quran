@@ -23,6 +23,7 @@ const VerseAudioPlayer = ({
 	const [isLoading, setIsLoading] = useState(false);
 	const [hasError, setHasError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
+	const [isLooping, setIsLooping] = useState(false);
 	const ERROR_DISPLAY_DURATION = 3000; // 3 seconds
 
 	useEffect(() => {
@@ -38,23 +39,14 @@ const VerseAudioPlayer = ({
 			setIsLoading(true);
 			setHasError(false);
 
-			// Check if the audio file exists first
-			try {
-				const response = await fetch(audioUrl, { method: "HEAD" });
-				if (!response.ok) {
-					throw new Error("Audio file not available");
-				}
-			} catch (error) {
-				throw new Error("Unable to connect to audio server");
-			}
-
 			if (sound) {
-				await sound.unloadAsync();
+				await sound.playAsync();
+				return;
 			}
 
 			const { sound: audioSound } = await Audio.Sound.createAsync(
 				{ uri: audioUrl },
-				{ shouldPlay: true }
+				{ shouldPlay: true, isLooping }
 			);
 
 			setSound(audioSound);
@@ -63,7 +55,6 @@ const VerseAudioPlayer = ({
 				if (status.isLoaded && status.didJustFinish) {
 					onPlaybackComplete();
 				}
-				// Handle playback errors
 				if (!status.isLoaded) {
 					handleError("Error during playback");
 				}
@@ -79,8 +70,7 @@ const VerseAudioPlayer = ({
 
 	const stopAudio = async () => {
 		if (sound) {
-			await sound.unloadAsync();
-			setSound(null);
+			await sound.pauseAsync();
 		}
 	};
 
@@ -94,11 +84,17 @@ const VerseAudioPlayer = ({
 		setErrorMessage(message);
 		onPlaybackStatusChange(false);
 
-		// Clear error state after delay
 		setTimeout(() => {
 			setHasError(false);
 			setErrorMessage(null);
 		}, ERROR_DISPLAY_DURATION);
+	};
+
+	const toggleLoop = () => {
+		setIsLooping(!isLooping);
+		if (sound) {
+			sound.setIsLoopingAsync(!isLooping);
+		}
 	};
 
 	// Cleanup
@@ -111,7 +107,7 @@ const VerseAudioPlayer = ({
 	}, [sound]);
 
 	return (
-		<View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+		<View className="flex flex-row items-center gap-2 justify-center">
 			<TouchableOpacity
 				onPress={togglePlayback}
 				disabled={isLoading || hasError}
@@ -129,7 +125,31 @@ const VerseAudioPlayer = ({
 				)}
 			</TouchableOpacity>
 
-			{errorMessage && (
+			<TouchableOpacity onPress={toggleLoop}>
+				<Ionicons
+					name={isLooping ? "repeat" : "repeat-outline"}
+					size={24}
+					color={isLooping ? "#0000ff" : "#888"}
+				/>
+			</TouchableOpacity>
+
+			<TouchableOpacity
+				onPress={() => {
+					/* Logic for previous */
+				}}
+			>
+				<Ionicons name="play-skip-back" size={24} color="#0000ff" />
+			</TouchableOpacity>
+
+			<TouchableOpacity
+				onPress={() => {
+					/* Logic for next */
+				}}
+			>
+				<Ionicons name="play-skip-forward" size={24} color="#0000ff" />
+			</TouchableOpacity>
+
+			{/* {errorMessage && (
 				<Text
 					style={{
 						fontSize: 12,
@@ -139,7 +159,7 @@ const VerseAudioPlayer = ({
 				>
 					{errorMessage}
 				</Text>
-			)}
+			)} */}
 		</View>
 	);
 };

@@ -5,6 +5,7 @@ const TabsLayout = () => {
 	return (
 		<Tabs
 			screenOptions={{
+				animation: "none",
 				headerShown: false,
 				tabBarStyle: {
 					height: 65,

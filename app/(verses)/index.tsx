@@ -5,19 +5,22 @@ import {
 	FlatList,
 	Pressable,
 	TextInput,
+	Modal,
 } from "react-native";
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useRef } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { fetchVersesByChapter } from "../../query/verses";
 import { Verse } from "../../types";
-import VerseAudioPlayer from "../../components/verse-audio-player";
 import { useStore } from "../../store";
 import { FontAwesome } from "@expo/vector-icons";
 import RecitorSelector from "../../components/recitor-selector";
+import VerseItem from "../../components/verse-item";
+import VerseAudioPlayer from "../../components/verse-audio-player";
 
 const VersesScreen = () => {
-	const { chapter, pages } = useLocalSearchParams();
+	const { chapter, pages, nameArabic, revelationPlace, versesCount } =
+		useLocalSearchParams();
 	const [currentlyPlayingVerseKey, setCurrentlyPlayingVerseKey] = useState<
 		string | null
 	>(null);
@@ -25,6 +28,10 @@ const VersesScreen = () => {
 	const [isRecitorModalVisible, setIsRecitorModalVisible] = useState(false);
 	const { selectedRecitor } = useStore();
 	const [searchQuery, setSearchQuery] = useState("");
+	const [globalPlayerVisible, setGlobalPlayerVisible] = useState(false);
+	const [currentVerse, setCurrentVerse] = useState<Verse | null>(null);
+	const shouldAutoPlay = React.useRef(false);
+	const flatListRef = useRef<FlatList>(null);
 
 	const {
 		data: versesData,
@@ -77,19 +84,22 @@ const VersesScreen = () => {
 		});
 	}, [flattenedVerses, searchQuery]);
 
-	console.log("Fetched verses data:", versesData);
-	console.log("Full response:", versesData);
-	console.log("Verses array:", versesData?.pages);
-	if (versesData?.pages?.[0]?.verses?.[0]) {
-		console.log("First verse structure:", {
-			id: versesData.pages[0].verses[0].id,
-			verse_number: versesData.pages[0].verses[0].verse_number,
-			text_uthmani: versesData.pages[0].verses[0].text_uthmani,
-			text_imlaei: versesData.pages[0].verses[0].text_imlaei,
-		});
-	}
+	const scrollToVerse = useCallback(
+		(verseKey: string) => {
+			const verseIndex = filteredVerses.findIndex(
+				(v) => v.verse_key === verseKey
+			);
+			if (verseIndex !== -1) {
+				flatListRef.current?.scrollToIndex({
+					index: verseIndex,
+					animated: true,
+					viewPosition: 0.3,
+				});
+			}
+		},
+		[filteredVerses]
+	);
 
-	// Function to play next verse
 	const playNextVerse = useCallback(
 		(currentVerseKey: string | null) => {
 			if (!currentVerseKey || !isAutoPlaying) return;
@@ -98,78 +108,176 @@ const VersesScreen = () => {
 			const nextVerseNumber = parseInt(currentVerse) + 1;
 			const nextVerseKey = `${currentChapter}:${nextVerseNumber}`;
 
-			// Check if next verse exists in our data
-			const nextVerseExists = flattenedVerses.some(
+			const nextVerse = flattenedVerses.find(
 				(v) => v.verse_key === nextVerseKey
 			);
-			if (nextVerseExists) {
-				setCurrentlyPlayingVerseKey(nextVerseKey);
+			if (nextVerse) {
+				shouldAutoPlay.current = true;
+				setTimeout(() => {
+					setCurrentVerse(nextVerse);
+					setCurrentlyPlayingVerseKey(nextVerseKey);
+					setIsAutoPlaying(true);
+					scrollToVerse(nextVerseKey);
+				}, 500);
 			} else {
+				shouldAutoPlay.current = false;
 				setIsAutoPlaying(false);
 				setCurrentlyPlayingVerseKey(null);
+				setCurrentVerse(null);
+				setGlobalPlayerVisible(false);
 			}
 		},
-		[flattenedVerses, isAutoPlaying]
+		[flattenedVerses, isAutoPlaying, scrollToVerse]
 	);
 
-	const renderVerseItem = ({ item: verse }: { item: Verse }) => (
-		<SafeAreaView
-			className={`mb-6 p-5 bg-gray-800 rounded-xl shadow-lg border ${
-				currentlyPlayingVerseKey === verse.verse_key
-					? "border-emerald-500/30 bg-emerald-900/20"
-					: "border-gray-700"
-			}`}
-		>
-			<Text
-				className={`text-2xl leading-10 font-medium mb-3 text-right ${
-					currentlyPlayingVerseKey === verse.verse_key
-						? "text-emerald-400"
-						: "text-gray-100"
-				}`}
-				style={{ fontFamily: "me_quran-2" }}
-			>
-				{verse.text_uthmani}
-			</Text>
-			<Text className="text-base text-gray-300 mb-4 text-right">
-				{verse.words.map((word) => word.translation.text).join(" ")}
-			</Text>
-			<View className="flex-row items-center justify-between">
-				<View className="flex-row items-center">
-					<Text className="text-sm text-gray-400">
-						Verse {verse.verse_number}
-					</Text>
-					<Text className="text-gray-600 mx-2">•</Text>
-					<Text className="text-sm text-gray-400">
-						{verse.verse_key}
-					</Text>
-				</View>
+	const VerseItemWithModal = React.memo(
+		({
+			verse,
+			currentlyPlayingVerseKey,
+			isAutoPlaying,
+			onPlaybackStatusChange,
+			onPlaybackComplete,
+		}: {
+			verse: Verse;
+			currentlyPlayingVerseKey: string | null;
+			isAutoPlaying: boolean;
+			onPlaybackStatusChange: (isPlaying: boolean) => void;
+			onPlaybackComplete: () => void;
+		}) => {
+			const [isOptionsModalVisible, setIsOptionsModalVisible] =
+				useState(false);
+			const [isPlaying, setIsPlaying] = useState(false);
 
-				<VerseAudioPlayer
-					audioUrl={`https://verses.quran.com/${verse.audio.url}`}
-					verseKey={verse.verse_key}
-					isCurrentlyPlaying={
-						currentlyPlayingVerseKey === verse.verse_key
-					}
-					onPlaybackStatusChange={(isPlaying) => {
-						if (isPlaying) {
-							setIsAutoPlaying(true);
-							setCurrentlyPlayingVerseKey(verse.verse_key);
-						} else if (
-							currentlyPlayingVerseKey === verse.verse_key
-						) {
-							// Only stop auto-playing if this verse is the current one
-							setIsAutoPlaying(false);
-							setCurrentlyPlayingVerseKey(null);
-						}
-					}}
-					onPlaybackComplete={() => {
-						if (isAutoPlaying) {
-							playNextVerse(verse.verse_key);
-						}
-					}}
-				/>
-			</View>
-		</SafeAreaView>
+			const audioUrl = verse.audio?.url
+				? `https://verses.quran.com/${verse.audio.url}`
+				: null;
+
+			const handlePlaybackStatusChange = (isPlaying: boolean) => {
+				setIsPlaying(isPlaying);
+				onPlaybackStatusChange(isPlaying);
+			};
+
+			return (
+				<View>
+					<Pressable
+						className="absolute top-2 left-2 w-12 h-12 rounded-full items-center justify-center z-10"
+						onPress={() => setIsOptionsModalVisible(true)}
+					>
+						<FontAwesome name="ellipsis-v" size={16} color="#fff" />
+					</Pressable>
+					<VerseItem
+						verse={verse}
+						currentlyPlayingVerseKey={currentlyPlayingVerseKey}
+						isAutoPlaying={isAutoPlaying}
+						onPlaybackStatusChange={onPlaybackStatusChange}
+						onPlaybackComplete={onPlaybackComplete}
+						hidePlayer={true}
+					/>
+					<Modal
+						visible={isOptionsModalVisible}
+						transparent={true}
+						animationType="fade"
+						onRequestClose={() => setIsOptionsModalVisible(false)}
+					>
+						<Pressable
+							className="flex-1 bg-black/50"
+							onPress={() => setIsOptionsModalVisible(false)}
+						>
+							<View className="flex-1 justify-center items-center">
+								<View className="bg-gray-900 rounded-xl p-4 flex-row justify-around w-80">
+									<Pressable
+										className="bg-emerald-500 p-2 rounded-full"
+										onPress={() => {
+											setIsOptionsModalVisible(false);
+											setCurrentVerse(verse);
+											setGlobalPlayerVisible(true);
+											setCurrentlyPlayingVerseKey(
+												verse.verse_key
+											);
+											setIsAutoPlaying(true);
+										}}
+									>
+										<Text className="text-white">Play</Text>
+									</Pressable>
+									<Pressable
+										className="items-center"
+										onPress={() => {
+											/* Bookmark logic */
+										}}
+										style={{ marginRight: 10 }}
+									>
+										<FontAwesome
+											name="bookmark"
+											size={24}
+											color="#6ee7b7"
+										/>
+										<Text className="text-emerald-100 mt-2 text-sm">
+											Bookmark
+										</Text>
+									</Pressable>
+									<Pressable
+										className="items-center"
+										onPress={() => {
+											/* Share logic */
+										}}
+										style={{ marginRight: 10 }}
+									>
+										<FontAwesome
+											name="share"
+											size={24}
+											color="#6ee7b7"
+										/>
+										<Text className="text-emerald-100 mt-2 text-sm">
+											Share
+										</Text>
+									</Pressable>
+									<Pressable
+										className="items-center"
+										onPress={() => {
+											/* Notes logic */
+										}}
+										style={{ marginRight: 10 }}
+									>
+										<FontAwesome
+											name="sticky-note"
+											size={24}
+											color="#6ee7b7"
+										/>
+										<Text className="text-emerald-100 mt-2 text-sm">
+											Notes
+										</Text>
+									</Pressable>
+								</View>
+							</View>
+						</Pressable>
+					</Modal>
+				</View>
+			);
+		}
+	);
+
+	VerseItemWithModal.displayName = "VerseItemWithModal";
+
+	const renderVerseItem = ({ item: verse }: { item: Verse }) => (
+		<VerseItemWithModal
+			verse={verse}
+			currentlyPlayingVerseKey={currentlyPlayingVerseKey}
+			isAutoPlaying={isAutoPlaying}
+			onPlaybackStatusChange={(isPlaying) => {
+				if (isPlaying) {
+					setIsAutoPlaying(true);
+					setCurrentlyPlayingVerseKey(verse.verse_key);
+				} else if (currentlyPlayingVerseKey === verse.verse_key) {
+					setIsAutoPlaying(false);
+					setCurrentlyPlayingVerseKey(null);
+				}
+			}}
+			onPlaybackComplete={() => {
+				if (isAutoPlaying) {
+					playNextVerse(verse.verse_key);
+				}
+			}}
+		/>
 	);
 
 	if (isLoading) {
@@ -199,33 +307,49 @@ const VersesScreen = () => {
 	return (
 		<SafeAreaView className="flex-1 bg-gray-900">
 			<View className="px-4 bg-gray-900">
-				<View className="mb-6">
-					<Text className="text-2xl font-bold text-gray-100 mb-2">
-						Chapter {chapter}
-					</Text>
-					<Text className="text-base text-gray-400">
-						Page {pages}
-					</Text>
+				<View className="mb-3 bg-emerald-900/80 rounded-xl p-4 shadow-lg">
+					<View className="flex-row justify-between items-center mb-3">
+						<View className="flex-1">
+							<Text className="text-base font-medium text-emerald-200">
+								Chapter {chapter}
+							</Text>
+							<View className="flex-row items-center mt-1">
+								<Text className="text-base text-emerald-100/80">
+									{revelationPlace} • {versesCount} verses
+								</Text>
+							</View>
+						</View>
+						<Text
+							className="text-5xl font-bold text-emerald-50 text-right"
+							style={{
+								fontFamily: "arabic",
+								lineHeight: 65,
+								paddingVertical: 5,
+							}}
+						>
+							{nameArabic}
+						</Text>
+					</View>
 					<View className="mt-4">
-						<View className="flex-row items-center bg-gray-800 rounded-lg px-4 py-2 border border-gray-700">
+						<View className="flex-row items-center bg-emerald-950/50 rounded-lg px-4 py-2 border border-emerald-800">
 							<FontAwesome
 								name="search"
 								size={16}
-								color="#9CA3AF"
+								color="#6EE7B7"
 							/>
 							<TextInput
-								className="flex-1 ml-2 text-base text-gray-100"
+								className="flex-1 ml-2 text-base text-emerald-50"
 								placeholder="Search verses..."
 								value={searchQuery}
 								onChangeText={setSearchQuery}
-								placeholderTextColor="#6B7280"
+								placeholderTextColor="#065F46"
 							/>
 							{searchQuery ? (
 								<Pressable onPress={() => setSearchQuery("")}>
 									<FontAwesome
 										name="times-circle"
 										size={16}
-										color="#6B7280"
+										color="#065F46"
 									/>
 								</Pressable>
 							) : null}
@@ -234,11 +358,22 @@ const VersesScreen = () => {
 				</View>
 			</View>
 			<FlatList
+				ref={flatListRef}
 				data={filteredVerses}
 				renderItem={renderVerseItem}
 				keyExtractor={(verse) => verse.id.toString()}
-				contentContainerClassName="px-4 py-6"
+				contentContainerClassName="px-4 py-6 pb-32"
 				showsVerticalScrollIndicator={false}
+				ItemSeparatorComponent={() => (
+					<View className="h-4 bg-gray-900" />
+				)}
+				onScrollToIndexFailed={(info) => {
+					setTimeout(() => {
+						if (currentlyPlayingVerseKey) {
+							scrollToVerse(currentlyPlayingVerseKey);
+						}
+					}, 500);
+				}}
 				initialNumToRender={10}
 				maxToRenderPerBatch={10}
 				windowSize={5}
@@ -261,6 +396,66 @@ const VersesScreen = () => {
 					</View>
 				)}
 			/>
+			{globalPlayerVisible && currentVerse && (
+				<View className="absolute bottom-0 left-0 right-0 bg-gray-800 p-4 border-t border-gray-700 shadow-lg">
+					<View className="flex-row items-center justify-center">
+						<View className="flex-1">
+							<Text className="text-lg font-semibold text-white">
+								{currentVerse.verse_key}
+							</Text>
+							<Text className="text-sm text-gray-400">
+								{currentVerse.translation}
+							</Text>
+						</View>
+						<VerseAudioPlayer
+							key={currentVerse.verse_key}
+							audioUrl={`https://verses.quran.com/${currentVerse.audio?.url}`}
+							verseKey={currentVerse.verse_key}
+							isCurrentlyPlaying={
+								shouldAutoPlay.current || isAutoPlaying
+							}
+							onPlaybackStatusChange={(isPlaying) => {
+								if (isPlaying) {
+									shouldAutoPlay.current = false;
+									scrollToVerse(currentVerse.verse_key);
+								}
+								if (!shouldAutoPlay.current) {
+									if (!isPlaying) {
+										if (
+											currentlyPlayingVerseKey ===
+											currentVerse.verse_key
+										) {
+											setIsAutoPlaying(false);
+											setCurrentlyPlayingVerseKey(null);
+										}
+									} else {
+										setCurrentlyPlayingVerseKey(
+											currentVerse.verse_key
+										);
+										setIsAutoPlaying(true);
+									}
+								}
+							}}
+							onPlaybackComplete={() => {
+								if (isAutoPlaying) {
+									playNextVerse(currentVerse.verse_key);
+								}
+							}}
+						/>
+					</View>
+					<Pressable
+						className="mt-2 bg-red-500 p-2 rounded-lg items-center"
+						onPress={() => {
+							setGlobalPlayerVisible(false);
+							setCurrentVerse(null);
+							setIsAutoPlaying(false);
+							setCurrentlyPlayingVerseKey(null);
+						}}
+					>
+						<Text className="text-white">Close Player</Text>
+					</Pressable>
+				</View>
+			)}
 			<View className="absolute right-8 bottom-8 w-14 h-14">
 				<Pressable
 					className="h-14 w-14 bg-emerald-600 rounded-full items-center justify-center shadow-lg"
