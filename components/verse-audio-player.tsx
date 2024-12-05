@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
+import {
+	View,
+	Text,
+	TouchableOpacity,
+	ActivityIndicator,
+	Alert,
+} from "react-native";
 import { Audio } from "expo-av";
 import * as FileSystem from "expo-file-system";
 import { Ionicons } from "@expo/vector-icons";
@@ -29,6 +35,7 @@ const VerseAudioPlayer = ({
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const [isLooping, setIsLooping] = useState(false);
 	const [isPlaying, setIsPlaying] = useState(false);
+	const [isDownloading, setIsDownloading] = useState(false);
 	const ERROR_DISPLAY_DURATION = 3000; // 3 seconds
 
 	useEffect(() => {
@@ -136,6 +143,66 @@ const VerseAudioPlayer = ({
 		}
 	};
 
+	const downloadAudio = async () => {
+		try {
+			setIsDownloading(true);
+
+			// Create directory if it doesn't exist
+			const dirPath = `${FileSystem.documentDirectory}quran_audio/`;
+			const dirInfo = await FileSystem.getInfoAsync(dirPath);
+			if (!dirInfo.exists) {
+				await FileSystem.makeDirectoryAsync(dirPath, {
+					intermediates: true,
+				});
+			}
+
+			// Generate local file path
+			const fileName = `verse_${verseKey.replace(":", "_")}.mp3`;
+			const fileUri = `${dirPath}${fileName}`;
+
+			// Check if file already exists
+			const fileInfo = await FileSystem.getInfoAsync(fileUri);
+			if (fileInfo.exists) {
+				Alert.alert(
+					"Already Downloaded",
+					"This verse audio has already been downloaded.",
+					[{ text: "OK" }]
+				);
+				return;
+			}
+
+			// Download the file
+			const downloadResumable = FileSystem.createDownloadResumable(
+				audioUrl,
+				fileUri,
+				{},
+				(downloadProgress) => {
+					const progress =
+						downloadProgress.totalBytesWritten /
+						downloadProgress.totalBytesExpectedToWrite;
+					// You could add a progress indicator here if desired
+				}
+			);
+
+			const { uri } = await downloadResumable.downloadAsync();
+
+			if (uri) {
+				Alert.alert("Success", "Audio downloaded successfully!", [
+					{ text: "OK" },
+				]);
+			}
+		} catch (error) {
+			console.error("Download error:", error);
+			Alert.alert(
+				"Download Failed",
+				"There was an error downloading the audio file.",
+				[{ text: "OK" }]
+			);
+		} finally {
+			setIsDownloading(false);
+		}
+	};
+
 	// Add cleanup for audio when component unmounts or audioUrl changes
 	useEffect(() => {
 		return () => {
@@ -215,15 +282,18 @@ const VerseAudioPlayer = ({
 					{/* Right Side */}
 					<TouchableOpacity
 						className="w-8 h-8 items-center justify-center"
-						onPress={() => {
-							/* Download logic */
-						}}
+						onPress={downloadAudio}
+						disabled={isDownloading}
 					>
-						<Ionicons
-							name="download-outline"
-							size={20}
-							color="#64748b"
-						/>
+						{isDownloading ? (
+							<ActivityIndicator size="small" color="#3b82f6" />
+						) : (
+							<Ionicons
+								name="download-outline"
+								size={20}
+								color="#64748b"
+							/>
+						)}
 					</TouchableOpacity>
 				</View>
 			</View>
