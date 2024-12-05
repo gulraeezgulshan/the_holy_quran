@@ -213,26 +213,26 @@ const VerseAudioPlayer = ({
 	}, [sound, audioUrl]);
 
 	return (
-		<View className="w-full px-4">
-			<View className="bg-gray-100 rounded-xl p-4">
+		<View className="w-full">
+			<View className="bg-gray-800 rounded-xl">
 				{/* Main Controls Container */}
 				<View className="flex flex-row items-center justify-between">
 					{/* Left Side */}
-					<TouchableOpacity
+					{/* <TouchableOpacity
 						onPress={toggleLoop}
-						className="w-8 h-8 items-center justify-center"
+						className="w-12 h-12 items-center justify-center"
 					>
 						<Ionicons
 							name={isLooping ? "repeat" : "repeat-outline"}
 							size={20}
 							color={isLooping ? "#3b82f6" : "#64748b"}
 						/>
-					</TouchableOpacity>
+					</TouchableOpacity> */}
 
 					{/* Center Controls Group */}
 					<View className="flex-row items-center space-x-8">
 						<TouchableOpacity
-							className="w-10 h-10 items-center justify-center"
+							className="w-12 h-12 items-center justify-center"
 							onPress={onPrevious}
 						>
 							<Ionicons
@@ -268,7 +268,7 @@ const VerseAudioPlayer = ({
 						</TouchableOpacity>
 
 						<TouchableOpacity
-							className="w-10 h-10 items-center justify-center"
+							className="w-12 h-12 items-center justify-center"
 							onPress={onNext}
 						>
 							<Ionicons
@@ -280,8 +280,8 @@ const VerseAudioPlayer = ({
 					</View>
 
 					{/* Right Side */}
-					<TouchableOpacity
-						className="w-8 h-8 items-center justify-center"
+					{/* <TouchableOpacity
+						className="w-12 h-12 items-center justify-center"
 						onPress={downloadAudio}
 						disabled={isDownloading}
 					>
@@ -294,7 +294,7 @@ const VerseAudioPlayer = ({
 								color="#64748b"
 							/>
 						)}
-					</TouchableOpacity>
+					</TouchableOpacity> */}
 				</View>
 			</View>
 		</View>

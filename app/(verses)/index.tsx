@@ -419,14 +419,6 @@ const VersesScreen = () => {
 			{globalPlayerVisible && currentVerse && (
 				<View className="absolute bottom-0 left-0 right-0 bg-gray-800 p-4 border-t border-gray-700 shadow-lg">
 					<View className="flex-row items-center justify-center">
-						<View className="flex-1">
-							<Text className="text-lg font-semibold text-white">
-								{currentVerse.verse_key}
-							</Text>
-							<Text className="text-sm text-gray-400">
-								{currentVerse.translation}
-							</Text>
-						</View>
 						<VerseAudioPlayer
 							key={currentVerse.verse_key}
 							audioUrl={`https://verses.quran.com/${currentVerse.audio?.url}`}
@@ -485,7 +477,7 @@ const VersesScreen = () => {
 							}}
 						/>
 					</View>
-					<Pressable
+					{/* <Pressable
 						className="mt-2 bg-red-500 p-2 rounded-lg items-center"
 						onPress={() => {
 							setGlobalPlayerVisible(false);
@@ -495,10 +487,10 @@ const VersesScreen = () => {
 						}}
 					>
 						<Text className="text-white">Close Player</Text>
-					</Pressable>
+					</Pressable> */}
 				</View>
 			)}
-			<View className="absolute right-8 bottom-8 w-14 h-14">
+			<View className="absolute right-8 bottom-4 w-14 h-14">
 				<Pressable
 					className="h-14 w-14 bg-emerald-600 rounded-full items-center justify-center shadow-lg"
 					onPress={() => {
