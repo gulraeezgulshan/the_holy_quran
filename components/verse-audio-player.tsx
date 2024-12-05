@@ -107,59 +107,91 @@ const VerseAudioPlayer = ({
 	}, [sound]);
 
 	return (
-		<View className="flex flex-row items-center gap-2 justify-center">
-			<TouchableOpacity
-				onPress={togglePlayback}
-				disabled={isLoading || hasError}
-			>
-				{isLoading ? (
-					<ActivityIndicator size="small" color="#0000ff" />
-				) : hasError ? (
-					<Ionicons name="alert-circle" size={24} color="#ff0000" />
-				) : (
-					<Ionicons
-						name={isCurrentlyPlaying ? "pause" : "play"}
-						size={24}
-						color="#0000ff"
-					/>
-				)}
-			</TouchableOpacity>
+		<View className="w-full px-4">
+			<View className="bg-gray-100 rounded-xl p-4">
+				{/* Main Controls Container */}
+				<View className="flex flex-row items-center justify-between">
+					{/* Left Side */}
+					<TouchableOpacity
+						onPress={toggleLoop}
+						className="w-8 h-8 items-center justify-center"
+					>
+						<Ionicons
+							name={isLooping ? "repeat" : "repeat-outline"}
+							size={20}
+							color={isLooping ? "#3b82f6" : "#64748b"}
+						/>
+					</TouchableOpacity>
 
-			<TouchableOpacity onPress={toggleLoop}>
-				<Ionicons
-					name={isLooping ? "repeat" : "repeat-outline"}
-					size={24}
-					color={isLooping ? "#0000ff" : "#888"}
-				/>
-			</TouchableOpacity>
+					{/* Center Controls Group */}
+					<View className="flex-row items-center space-x-8">
+						<TouchableOpacity
+							className="w-10 h-10 items-center justify-center"
+							onPress={() => {
+								/* Logic for previous */
+							}}
+						>
+							<Ionicons
+								name="play-skip-back"
+								size={24}
+								color="#3b82f6"
+							/>
+						</TouchableOpacity>
 
-			<TouchableOpacity
-				onPress={() => {
-					/* Logic for previous */
-				}}
-			>
-				<Ionicons name="play-skip-back" size={24} color="#0000ff" />
-			</TouchableOpacity>
+						<TouchableOpacity
+							onPress={togglePlayback}
+							disabled={isLoading || hasError}
+							className="w-14 h-14 bg-blue-500 rounded-full items-center justify-center shadow-lg"
+						>
+							{isLoading ? (
+								<ActivityIndicator
+									size="small"
+									color="#ffffff"
+								/>
+							) : hasError ? (
+								<Ionicons
+									name="alert-circle"
+									size={28}
+									color="#ef4444"
+								/>
+							) : (
+								<Ionicons
+									name={isCurrentlyPlaying ? "pause" : "play"}
+									size={28}
+									color="#ffffff"
+								/>
+							)}
+						</TouchableOpacity>
 
-			<TouchableOpacity
-				onPress={() => {
-					/* Logic for next */
-				}}
-			>
-				<Ionicons name="play-skip-forward" size={24} color="#0000ff" />
-			</TouchableOpacity>
+						<TouchableOpacity
+							className="w-10 h-10 items-center justify-center"
+							onPress={() => {
+								/* Logic for next */
+							}}
+						>
+							<Ionicons
+								name="play-skip-forward"
+								size={24}
+								color="#3b82f6"
+							/>
+						</TouchableOpacity>
+					</View>
 
-			{/* {errorMessage && (
-				<Text
-					style={{
-						fontSize: 12,
-						color: "#ff0000",
-						maxWidth: 150,
-					}}
-				>
-					{errorMessage}
-				</Text>
-			)} */}
+					{/* Right Side */}
+					<TouchableOpacity
+						className="w-8 h-8 items-center justify-center"
+						onPress={() => {
+							/* Download logic */
+						}}
+					>
+						<Ionicons
+							name="download-outline"
+							size={20}
+							color="#64748b"
+						/>
+					</TouchableOpacity>
+				</View>
+			</View>
 		</View>
 	);
 };

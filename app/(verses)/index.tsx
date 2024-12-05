@@ -180,73 +180,93 @@ const VersesScreen = () => {
 						onRequestClose={() => setIsOptionsModalVisible(false)}
 					>
 						<Pressable
-							className="flex-1 bg-black/50"
+							className="flex-1 bg-black/60"
 							onPress={() => setIsOptionsModalVisible(false)}
 						>
 							<View className="flex-1 justify-center items-center">
-								<View className="bg-gray-900 rounded-xl p-4 flex-row justify-around w-80">
-									<Pressable
-										className="bg-emerald-500 p-2 rounded-full"
-										onPress={() => {
-											setIsOptionsModalVisible(false);
-											setCurrentVerse(verse);
-											setGlobalPlayerVisible(true);
-											setCurrentlyPlayingVerseKey(
-												verse.verse_key
-											);
-											setIsAutoPlaying(true);
-										}}
-									>
-										<Text className="text-white">Play</Text>
-									</Pressable>
-									<Pressable
-										className="items-center"
-										onPress={() => {
-											/* Bookmark logic */
-										}}
-										style={{ marginRight: 10 }}
-									>
-										<FontAwesome
-											name="bookmark"
-											size={24}
-											color="#6ee7b7"
-										/>
-										<Text className="text-emerald-100 mt-2 text-sm">
-											Bookmark
-										</Text>
-									</Pressable>
-									<Pressable
-										className="items-center"
-										onPress={() => {
-											/* Share logic */
-										}}
-										style={{ marginRight: 10 }}
-									>
-										<FontAwesome
-											name="share"
-											size={24}
-											color="#6ee7b7"
-										/>
-										<Text className="text-emerald-100 mt-2 text-sm">
-											Share
-										</Text>
-									</Pressable>
-									<Pressable
-										className="items-center"
-										onPress={() => {
-											/* Notes logic */
-										}}
-										style={{ marginRight: 10 }}
-									>
-										<FontAwesome
-											name="sticky-note"
-											size={24}
-											color="#6ee7b7"
-										/>
-										<Text className="text-emerald-100 mt-2 text-sm">
-											Notes
-										</Text>
-									</Pressable>
+								<View className="bg-gray-800/95 rounded-2xl p-6 w-[85%] backdrop-blur-xl border border-gray-700">
+									<Text className="text-emerald-50 text-lg font-semibold mb-4">
+										Verse {verse.verse_key}
+									</Text>
+									<View className="flex-row flex-wrap justify-between">
+										<Pressable
+											className="items-center w-[30%] mb-4"
+											onPress={() => {
+												setIsOptionsModalVisible(false);
+												setCurrentVerse(verse);
+												setGlobalPlayerVisible(true);
+												setCurrentlyPlayingVerseKey(
+													verse.verse_key
+												);
+												setIsAutoPlaying(true);
+											}}
+										>
+											<View className="w-12 h-12 bg-emerald-500/20 rounded-full items-center justify-center mb-2">
+												<FontAwesome
+													name="play"
+													size={20}
+													color="#6ee7b7"
+												/>
+											</View>
+											<Text className="text-emerald-100 text-sm">
+												Play
+											</Text>
+										</Pressable>
+
+										<Pressable
+											className="items-center w-[30%] mb-4"
+											onPress={() => {
+												/* Bookmark logic */
+											}}
+										>
+											<View className="w-12 h-12 bg-emerald-500/20 rounded-full items-center justify-center mb-2">
+												<FontAwesome
+													name="bookmark"
+													size={20}
+													color="#6ee7b7"
+												/>
+											</View>
+											<Text className="text-emerald-100 text-sm">
+												Bookmark
+											</Text>
+										</Pressable>
+
+										<Pressable
+											className="items-center w-[30%] mb-4"
+											onPress={() => {
+												/* Share logic */
+											}}
+										>
+											<View className="w-12 h-12 bg-emerald-500/20 rounded-full items-center justify-center mb-2">
+												<FontAwesome
+													name="share"
+													size={20}
+													color="#6ee7b7"
+												/>
+											</View>
+											<Text className="text-emerald-100 text-sm">
+												Share
+											</Text>
+										</Pressable>
+
+										<Pressable
+											className="items-center w-[30%]"
+											onPress={() => {
+												/* Notes logic */
+											}}
+										>
+											<View className="w-12 h-12 bg-emerald-500/20 rounded-full items-center justify-center mb-2">
+												<FontAwesome
+													name="sticky-note"
+													size={20}
+													color="#6ee7b7"
+												/>
+											</View>
+											<Text className="text-emerald-100 text-sm">
+												Notes
+											</Text>
+										</Pressable>
+									</View>
 								</View>
 							</View>
 						</Pressable>
