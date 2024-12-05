@@ -28,6 +28,7 @@ const VerseAudioPlayer = ({
 	const [hasError, setHasError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const [isLooping, setIsLooping] = useState(false);
+	const [isPlaying, setIsPlaying] = useState(false);
 	const ERROR_DISPLAY_DURATION = 3000; // 3 seconds
 
 	useEffect(() => {
@@ -44,8 +45,12 @@ const VerseAudioPlayer = ({
 			setHasError(false);
 
 			if (sound) {
-				await sound.playAsync();
-				return;
+				const status = await sound.getStatusAsync();
+				if (status.isLoaded) {
+					await sound.playAsync();
+					setIsPlaying(true);
+					return;
+				}
 			}
 
 			const { sound: audioSound } = await Audio.Sound.createAsync(
@@ -54,12 +59,15 @@ const VerseAudioPlayer = ({
 			);
 
 			setSound(audioSound);
+			setIsPlaying(true);
 
 			audioSound.setOnPlaybackStatusUpdate((status) => {
-				if (status.isLoaded && status.didJustFinish) {
-					onPlaybackComplete();
-				}
-				if (!status.isLoaded) {
+				if (status.isLoaded) {
+					if (status.didJustFinish) {
+						setIsPlaying(false);
+						onPlaybackComplete();
+					}
+				} else {
 					handleError("Error during playback");
 				}
 			});
@@ -73,13 +81,40 @@ const VerseAudioPlayer = ({
 	};
 
 	const stopAudio = async () => {
-		if (sound) {
-			await sound.pauseAsync();
+		try {
+			if (sound) {
+				const status = await sound.getStatusAsync();
+				if (status.isLoaded) {
+					await sound.pauseAsync();
+					setIsPlaying(false);
+				}
+			}
+		} catch (error) {
+			console.error("Error stopping audio:", error);
 		}
 	};
 
-	const togglePlayback = () => {
-		onPlaybackStatusChange(!isCurrentlyPlaying);
+	const togglePlayback = async () => {
+		try {
+			if (sound) {
+				const status = await sound.getStatusAsync();
+				if (status.isLoaded) {
+					if (status.isPlaying) {
+						await stopAudio();
+					} else {
+						await playAudio();
+					}
+				} else {
+					await playAudio();
+				}
+			} else {
+				await playAudio();
+			}
+			onPlaybackStatusChange(!isCurrentlyPlaying);
+		} catch (error) {
+			console.error("Error toggling playback:", error);
+			handleError("Error toggling playback");
+		}
 	};
 
 	const handleError = (message: string) => {
@@ -101,14 +136,14 @@ const VerseAudioPlayer = ({
 		}
 	};
 
-	// Cleanup
+	// Add cleanup for audio when component unmounts or audioUrl changes
 	useEffect(() => {
 		return () => {
 			if (sound) {
 				sound.unloadAsync();
 			}
 		};
-	}, [sound]);
+	}, [sound, audioUrl]);
 
 	return (
 		<View className="w-full px-4">
@@ -158,7 +193,7 @@ const VerseAudioPlayer = ({
 								/>
 							) : (
 								<Ionicons
-									name={isCurrentlyPlaying ? "pause" : "play"}
+									name={isPlaying ? "pause" : "play"}
 									size={28}
 									color="#ffffff"
 								/>
