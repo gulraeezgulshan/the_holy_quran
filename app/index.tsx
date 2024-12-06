@@ -13,6 +13,10 @@ import {
 	Calendar,
 	Heart,
 	ChevronRight,
+	Compass,
+	BookMarked,
+	Clock,
+	Circle,
 } from "lucide-react-native";
 import { useState, useEffect } from "react";
 import { router } from "expo-router";
@@ -267,6 +271,75 @@ export default function App() {
 								{randomName.meaningUrdu}
 							</Text>
 						</View>
+					</View>
+				</View>
+
+				<View className="mt-6 px-4 mb-6">
+					<Text className="text-xl font-bold text-gray-100 mb-4">
+						Features
+					</Text>
+					<View className="flex-row flex-wrap justify-between">
+						<Pressable
+							onPress={() => router.push("/(screens)/qibla")}
+							className="bg-gray-800 rounded-xl shadow-lg p-4 mb-4 w-[48%]"
+						>
+							<View className="items-center">
+								<Compass size={32} color="#10b981" />
+								<Text className="text-lg text-gray-100 mt-2">
+									Qibla Direction
+								</Text>
+								<Text className="text-sm text-gray-400 text-center">
+									Find prayer direction
+								</Text>
+							</View>
+						</Pressable>
+
+						<Pressable
+							onPress={() => router.push("/(screens)/duas")}
+							className="bg-gray-800 rounded-xl shadow-lg p-4 mb-4 w-[48%]"
+						>
+							<View className="items-center">
+								<BookMarked size={32} color="#10b981" />
+								<Text className="text-lg text-gray-100 mt-2">
+									Duas & Azkar
+								</Text>
+								<Text className="text-sm text-gray-400 text-center">
+									Daily supplications
+								</Text>
+							</View>
+						</Pressable>
+
+						<Pressable
+							onPress={() =>
+								router.push("/(screens)/prayer-times")
+							}
+							className="bg-gray-800 rounded-xl shadow-lg p-4 mb-4 w-[48%]"
+						>
+							<View className="items-center">
+								<Clock size={32} color="#10b981" />
+								<Text className="text-lg text-gray-100 mt-2">
+									Prayer Times
+								</Text>
+								<Text className="text-sm text-gray-400 text-center">
+									Daily salah schedule
+								</Text>
+							</View>
+						</Pressable>
+
+						<Pressable
+							onPress={() => router.push("/(screens)/tasbih")}
+							className="bg-gray-800 rounded-xl shadow-lg p-4 mb-4 w-[48%]"
+						>
+							<View className="items-center">
+								<Circle size={32} color="#10b981" />
+								<Text className="text-lg text-gray-100 mt-2">
+									Tasbih
+								</Text>
+								<Text className="text-sm text-gray-400 text-center">
+									Digital counter
+								</Text>
+							</View>
+						</Pressable>
 					</View>
 				</View>
 			</ScrollView>

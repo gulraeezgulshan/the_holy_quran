@@ -418,97 +418,103 @@ const VersesScreen = () => {
 			/>
 			{globalPlayerVisible && currentVerse && (
 				<View className="absolute bottom-0 left-0 right-0 bg-gray-800 p-4 border-t border-gray-700 shadow-lg">
-					<View className="flex-row items-center justify-center">
-						<VerseAudioPlayer
-							key={currentVerse.verse_key}
-							audioUrl={`https://verses.quran.com/${currentVerse.audio?.url}`}
-							verseKey={currentVerse.verse_key}
-							isCurrentlyPlaying={
-								shouldAutoPlay.current || isAutoPlaying
-							}
-							onPlaybackStatusChange={(isPlaying) => {
-								if (isPlaying) {
-									shouldAutoPlay.current = false;
-									scrollToVerse(currentVerse.verse_key);
+					<View className="items-center justify-between flex-row">
+						<View className="flex-1">
+							<VerseAudioPlayer
+								key={currentVerse.verse_key}
+								audioUrl={`https://verses.quran.com/${currentVerse.audio?.url}`}
+								verseKey={currentVerse.verse_key}
+								isCurrentlyPlaying={
+									shouldAutoPlay.current || isAutoPlaying
 								}
-								if (!shouldAutoPlay.current) {
-									if (!isPlaying) {
-										if (
-											currentlyPlayingVerseKey ===
-											currentVerse.verse_key
-										) {
-											setIsAutoPlaying(false);
-											setCurrentlyPlayingVerseKey(null);
+								onPlaybackStatusChange={(isPlaying) => {
+									if (isPlaying) {
+										shouldAutoPlay.current = false;
+										scrollToVerse(currentVerse.verse_key);
+									}
+									if (!shouldAutoPlay.current) {
+										if (!isPlaying) {
+											if (
+												currentlyPlayingVerseKey ===
+												currentVerse.verse_key
+											) {
+												setIsAutoPlaying(false);
+												setCurrentlyPlayingVerseKey(
+													null
+												);
+											}
+										} else {
+											setCurrentlyPlayingVerseKey(
+												currentVerse.verse_key
+											);
+											setIsAutoPlaying(true);
 										}
-									} else {
+									}
+								}}
+								onPlaybackComplete={() => {
+									if (isAutoPlaying) {
+										playNextVerse(currentVerse.verse_key);
+									}
+								}}
+								onNext={() => {
+									playNextVerse(currentVerse.verse_key);
+								}}
+								onPrevious={() => {
+									const [currentChapter, currentVerseNumber] =
+										currentVerse.verse_key.split(":");
+									const previousVerseNumber =
+										parseInt(currentVerseNumber) - 1;
+									const previousVerseKey = `${currentChapter}:${previousVerseNumber}`;
+
+									const previousVerse = flattenedVerses.find(
+										(v) => v.verse_key === previousVerseKey
+									);
+									if (previousVerse) {
+										setCurrentVerse(previousVerse);
 										setCurrentlyPlayingVerseKey(
-											currentVerse.verse_key
+											previousVerseKey
 										);
 										setIsAutoPlaying(true);
+										scrollToVerse(previousVerseKey);
 									}
-								}
-							}}
-							onPlaybackComplete={() => {
-								if (isAutoPlaying) {
-									playNextVerse(currentVerse.verse_key);
-								}
-							}}
-							onNext={() => {
-								playNextVerse(currentVerse.verse_key);
-							}}
-							onPrevious={() => {
-								const [currentChapter, currentVerseNumber] =
-									currentVerse.verse_key.split(":");
-								const previousVerseNumber =
-									parseInt(currentVerseNumber) - 1;
-								const previousVerseKey = `${currentChapter}:${previousVerseNumber}`;
+								}}
+							/>
+						</View>
 
-								const previousVerse = flattenedVerses.find(
-									(v) => v.verse_key === previousVerseKey
-								);
-								if (previousVerse) {
-									setCurrentVerse(previousVerse);
-									setCurrentlyPlayingVerseKey(
-										previousVerseKey
-									);
-									setIsAutoPlaying(true);
-									scrollToVerse(previousVerseKey);
-								}
-							}}
-						/>
+						<View className="flex-row items-center gap-4">
+							<Pressable
+								className="h-14 w-14 bg-emerald-600 rounded-full items-center justify-center shadow-lg"
+								onPress={() => setIsRecitorModalVisible(true)}
+							>
+								<FontAwesome
+									name="microphone"
+									size={24}
+									color="white"
+								/>
+							</Pressable>
+							<Pressable
+								onPress={() => {
+									setGlobalPlayerVisible(false);
+									setCurrentVerse(null);
+									setIsAutoPlaying(false);
+									setCurrentlyPlayingVerseKey(null);
+								}}
+							>
+								<FontAwesome
+									name="times"
+									size={20}
+									color="#9CA3AF"
+								/>
+							</Pressable>
+						</View>
 					</View>
-					{/* <Pressable
-						className="mt-2 bg-red-500 p-2 rounded-lg items-center"
-						onPress={() => {
-							setGlobalPlayerVisible(false);
-							setCurrentVerse(null);
-							setIsAutoPlaying(false);
-							setCurrentlyPlayingVerseKey(null);
-						}}
-					>
-						<Text className="text-white">Close Player</Text>
-					</Pressable> */}
+					<RecitorSelector
+						isVisible={isRecitorModalVisible}
+						onClose={() => setIsRecitorModalVisible(false)}
+						showButton={false}
+					/>
 				</View>
 			)}
-			<View className="absolute right-8 bottom-4 w-14 h-14">
-				<Pressable
-					className="h-14 w-14 bg-emerald-600 rounded-full items-center justify-center shadow-lg"
-					onPress={() => {
-						console.log("Opening modal");
-						setIsRecitorModalVisible(true);
-					}}
-				>
-					<FontAwesome name="microphone" size={24} color="white" />
-				</Pressable>
-				<RecitorSelector
-					isVisible={isRecitorModalVisible}
-					onClose={() => {
-						console.log("Closing modal");
-						setIsRecitorModalVisible(false);
-					}}
-					showButton={false}
-				/>
-			</View>
 		</SafeAreaView>
 	);
 };

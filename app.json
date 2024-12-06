@@ -34,6 +34,12 @@
 						"./assets/fonts/quran/hafs/me_quran/me_quran-2.ttf"
 					]
 				}
+			],
+			[
+				"expo-location",
+				{
+					"locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location to find Qibla direction."
+				}
 			]
 		],
 		"doctor": {

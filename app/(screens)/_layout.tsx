@@ -13,6 +13,11 @@ const ScreenLayout = () => {
 					headerTintColor: "#fff",
 				}}
 			/>
+			<Stack.Screen
+				name="prayer-times"
+				options={{ title: "Prayer Times" }}
+			/>
+			<Stack.Screen name="qibla" options={{ title: "Qibla" }} />
 		</Stack>
 	);
 };
